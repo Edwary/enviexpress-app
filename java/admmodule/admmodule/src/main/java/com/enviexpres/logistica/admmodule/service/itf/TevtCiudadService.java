@@ -3,28 +3,29 @@
 import java.util.List;
 import java.util.Map;
 
-import co.com.vimodules.admmodule.model.TvvtCiudad;
+import com.enviexpres.logistica.admmodule.model.TevtCiudad;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface TevtCiudadService {
 
-	Mono<TvvtCiudad> create(Map<String, Object> entity);
+	Mono<TevtCiudad> create(Map<String, Object> entity);
 	
-	Mono<TvvtCiudad> findById(String id);
+	Mono<TevtCiudad> findById(String id);
 	
-	Flux<TvvtCiudad> findAll();
+	Flux<TevtCiudad> findAll();
 	
 	Mono<Void> remove(String id);
 	
-	Flux<TvvtCiudad> createVarious(List<Map<String, Object>> entityList);
+	Flux<TevtCiudad> createVarious(List<Map<String, Object>> entityList);
 
 	Flux<Map<String, Object>> findIfContains(Map<String, String> filter);
 	
-	Mono<TvvtCiudad> toggleCiudad(String id);
+	Mono<TevtCiudad> toggleCiudad(String id);
 	
-	Mono<TvvtCiudad> logicRemove(String id);
+	Mono<TevtCiudad> logicRemove(String id);
 
-	Flux<TvvtCiudad> actualizarCiudades();
+	Flux<TevtCiudad> actualizarCiudades();
 	
 }

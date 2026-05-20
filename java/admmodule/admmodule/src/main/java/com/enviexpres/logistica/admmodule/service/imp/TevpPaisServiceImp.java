@@ -12,16 +12,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import co.com.vimodules.admmodule.model.TvvnError;
-import co.com.vimodules.admmodule.model.TvvnEstado;
-import co.com.vimodules.admmodule.model.TvvpPais;
-import co.com.vimodules.admmodule.repository.itf.TvvnErrorRepository;
-import co.com.vimodules.admmodule.repository.itf.TvvpPaisRepository;
-import co.com.vimodules.admmodule.service.itf.TvvpPaisService;
-import co.com.vimodules.admmodule.utils.UtilConverter;
-import co.com.vimodules.admmodule.utils.ViConstant;
-import co.com.vimodules.admmodule.utils.ViGeneral;
-import co.com.vimodules.admmodule.utils.exception.ViValidationException;
+import com.enviexpres.logistica.admmodule.model.TevnError;
+import com.enviexpres.logistica.admmodule.model.TevnEstado;
+import com.enviexpres.logistica.admmodule.model.TevpPais;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnErrorRepository;
+import com.enviexpres.logistica.admmodule.repository.itf.TevpPaisRepository;
+import com.enviexpres.logistica.admmodule.service.itf.TevpPaisService;
+import com.enviexpres.logistica.admmodule.utils.Constant;
+import com.enviexpres.logistica.admmodule.utils.UtilConverter;
+import com.enviexpres.logistica.admmodule.utils.exception.ValidationException;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,119 +29,119 @@ import reactor.core.publisher.Mono;
 public class TevpPaisServiceImp implements TevpPaisService {
 
 	@Autowired
-	private TvvpPaisRepository tvvpPaisRepository;
+	private TevpPaisRepository tevpPaisRepository;
 	
 	@Autowired
-	private TvvnErrorRepository tvvnErrorRepository;
+	private TevnErrorRepository tevnErrorRepository;
 	
-	private static String MODULO = ViConstant.MODULO_ADM;
+	private static String MODULO = Constant.MODULO_ADM;
 	
 	@Override
-	public Mono<TvvpPais> create(Map<String, Object> entity) {
-		TvvpPais tvvpPais = new TvvpPais();
-		tvvpPais.setIdPais(String.valueOf(entity.get("idPais")));
-		tvvpPais.setNmPais(String.valueOf(entity.get("nmPais")));
-		tvvpPais.setSbPais(String.valueOf(entity.get("sbPais")));
-		tvvpPais.setContinente(String.valueOf(entity.get("continente")));
-		tvvpPais.setIdEstado(String.valueOf(entity.get("idEstado")).isEmpty() ? ViConstant.IND_ESTADO_ACTIVO : String.valueOf(entity.get("idEstado")));
-		return tvvpPaisRepository.save(tvvpPais);
+	public Mono<TevpPais> create(Map<String, Object> entity) {
+		TevpPais tevpPais = new TevpPais();
+		tevpPais.setIdPais(String.valueOf(entity.get("idPais")));
+		tevpPais.setNmPais(String.valueOf(entity.get("nmPais")));
+		tevpPais.setSbPais(String.valueOf(entity.get("sbPais")));
+		tevpPais.setContinente(String.valueOf(entity.get("continente")));
+		tevpPais.setIdEstado(String.valueOf(entity.get("idEstado")).isEmpty() ? Constant.IND_ESTADO_ACTIVO : String.valueOf(entity.get("idEstado")));
+		return tevpPaisRepository.save(tevpPais);
 	}
 
 	@Override
-	public Mono<TvvpPais> findById(String id) {
-		return tvvpPaisRepository.findById(id);
+	public Mono<TevpPais> findById(String id) {
+		return tevpPaisRepository.findById(id);
 	}
 
 	@Override
-	public Flux<TvvpPais> findAll() {
-		List<TvvpPais> tvvpPaisList = tvvpPaisRepository.findAll().toStream().filter(p -> !p.getIdEstado().equals(ViConstant.IND_ESTADO_ELIMINADO)).collect(Collectors.toList());
-		return Flux.fromIterable(tvvpPaisList);
+	public Flux<TevpPais> findAll() {
+		List<TevpPais> tevpPaisList = tevpPaisRepository.findAll().toStream().filter(p -> !p.getIdEstado().equals(Constant.IND_ESTADO_ELIMINADO)).collect(Collectors.toList());
+		return Flux.fromIterable(tevpPaisList);
 	}
 
 	@Override
 	public Mono<Void> remove(String id) {
-		TvvpPais tvvpPais = tvvpPaisRepository.findById(id).block();
-		return tvvpPaisRepository.delete(tvvpPais);
+		TevpPais tevpPais = tevpPaisRepository.findById(id).block();
+		return tevpPaisRepository.delete(tevpPais);
 	}
 
 	@Override
-	public Flux<TvvpPais> createVarious(List<Map<String, Object>> entityList) {
+	public Flux<TevpPais> createVarious(List<Map<String, Object>> entityList) {
 		
 		if(Objects.isNull(entityList)) {
 			return null;
 		}
 		
-		Iterable<TvvpPais> tvvpPaisIterable = entityList.stream()
-				.map(tvvpPaisMap -> {
-					TvvpPais tvvpPais = new TvvpPais();
-					tvvpPais.setIdPais(String.valueOf(tvvpPaisMap.get("idPais")));
-					tvvpPais.setNmPais(String.valueOf(tvvpPaisMap.get("nmPais")));
-					tvvpPais.setSbPais(String.valueOf(tvvpPaisMap.get("sbPais")));
-					tvvpPais.setContinente(String.valueOf(tvvpPaisMap.get("continente")));
-					tvvpPais.setIdEstado(String.valueOf(tvvpPaisMap.get("idEstado")));
-					return tvvpPais;
+		Iterable<TevpPais> tevpPaisIterable = entityList.stream()
+				.map(tevpPaisMap -> {
+					TevpPais tevpPais = new TevpPais();
+					tevpPais.setIdPais(String.valueOf(tevpPaisMap.get("idPais")));
+					tevpPais.setNmPais(String.valueOf(tevpPaisMap.get("nmPais")));
+					tevpPais.setSbPais(String.valueOf(tevpPaisMap.get("sbPais")));
+					tevpPais.setContinente(String.valueOf(tevpPaisMap.get("continente")));
+					tevpPais.setIdEstado(String.valueOf(tevpPaisMap.get("idEstado")));
+					return tevpPais;
 				})
 				.collect(Collectors.toList());
 		
-		return tvvpPaisRepository.saveAll(tvvpPaisIterable);
+		return tevpPaisRepository.saveAll(tevpPaisIterable);
 	}
 
 	@Override
 	public Flux<Map<String, Object>> findIfContains(Map<String, String> filter) {
-		List<Map<String, Object>> tvvpPaisList = new ArrayList<>();
+		List<Map<String, Object>> tevpPaisList = new ArrayList<>();
 		if(filter.get("nmPais").isEmpty() && filter.get("sbPais").isEmpty() && filter.get("continente").isEmpty() && filter.get("idEstado").isEmpty()) {
-			Flux<TvvpPais> tvvpPaisObjectFlux = Flux.fromIterable(tvvpPaisRepository.findAll().toStream().filter(p -> !p.getIdEstado().equals(ViConstant.IND_ESTADO_ELIMINADO)).collect(Collectors.toList()));
-			tvvpPaisObjectFlux.toStream().forEach(tvvpPais -> {
-				Map<String, Object> tvvpPaisMap = UtilConverter.classToMap(tvvpPais);
-				tvvpPaisList.add(tvvpPaisMap);
+			Flux<TevpPais> tevpPaisObjectFlux = Flux.fromIterable(tevpPaisRepository.findAll().toStream().filter(p -> !p.getIdEstado().equals(Constant.IND_ESTADO_ELIMINADO)).collect(Collectors.toList()));
+			tevpPaisObjectFlux.toStream().forEach(tevpPais -> {
+				Map<String, Object> tevpPaisMap = UtilConverter.classToMap(tevpPais);
+				tevpPaisList.add(tevpPaisMap);
 			});
-			return Flux.fromIterable(tvvpPaisList);
+			return Flux.fromIterable(tevpPaisList);
 		}else {
-			Flux<Document> tvvpPaisesFlux = tvvpPaisRepository.findObjectIfContains(filter);
-			tvvpPaisesFlux.map(document -> {
+			Flux<Document> tevpPaisesFlux = tevpPaisRepository.findObjectIfContains(filter);
+			tevpPaisesFlux.map(document -> {
 				Map<String, Object> resultMap = new HashMap<>();
 				for(String key : document.keySet()) {
 					resultMap.put(key, document.get(key));
 				}
 				return resultMap;
-			}).collectList().block().stream().forEach(tvvpPaisObject -> {
+			}).collectList().block().stream().forEach(tevpPaisObject -> {
 				try {
-					Map<String, Object> tvvpPaisMap = new HashMap<>();
-					TvvpPais tvvpPais = UtilConverter.documentToClass(TvvpPais.class, (Document) tvvpPaisObject.get("tvvp_pais"));
-					if(!tvvpPais.getIdEstado().equals(ViConstant.IND_ESTADO_ELIMINADO)) {
-						TvvnEstado tvvnEstado = UtilConverter.documentToClass(TvvnEstado.class, (Document) tvvpPaisObject.get("tvvn_estado"));
-						tvvpPaisMap = UtilConverter.classToMap(tvvpPais);
-						tvvpPaisMap.put("nmEstado", tvvnEstado.getNmEstado());
-						tvvpPaisMap.put("sbEstado", tvvnEstado.getSbEstado());
-						tvvpPaisList.add(tvvpPaisMap);
+					Map<String, Object> tevpPaisMap = new HashMap<>();
+					TevpPais tevpPais = UtilConverter.documentToClass(TevpPais.class, (Document) tevpPaisObject.get("tevp_pais"));
+					if(!tevpPais.getIdEstado().equals(Constant.IND_ESTADO_ELIMINADO)) {
+						TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) tevpPaisObject.get("tevn_estado"));
+						tevpPaisMap = UtilConverter.classToMap(tevpPais);
+						tevpPaisMap.put("nmEstado", tevnEstado.getNmEstado());
+						tevpPaisMap.put("sbEstado", tevnEstado.getSbEstado());
+						tevpPaisList.add(tevpPaisMap);
 					}
 				} catch (IllegalAccessException | InstantiationException e) {
-					TvvnError tvvnError = ViGeneral.createError(e, MODULO);
-					tvvnErrorRepository.save(tvvnError);
-					throw new ViValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.InformacionUsuario");
+					TevnError tevnError = UtilConverter.createError(e, MODULO);
+					tevnErrorRepository.save(tevnError);
+					throw new ValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.InformacionUsuario");
 				}
 			});
-			Flux<Map<String, Object>> mapResultFlux = Flux.fromIterable(tvvpPaisList);
+			Flux<Map<String, Object>> mapResultFlux = Flux.fromIterable(tevpPaisList);
 			return mapResultFlux;
 		}
 	}
 	
 	@Override
-	public Mono<TvvpPais> togglePais(String id) {
-		TvvpPais tvvpPais = tvvpPaisRepository.findById(id).block();
-		if(tvvpPais.getIdEstado().equals(ViConstant.IND_ESTADO_ACTIVO)) {
-			tvvpPais.setIdEstado(ViConstant.IND_ESTADO_INACTIVO);
+	public Mono<TevpPais> togglePais(String id) {
+		TevpPais tevpPais = tevpPaisRepository.findById(id).block();
+		if(tevpPais.getIdEstado().equals(Constant.IND_ESTADO_ACTIVO)) {
+			tevpPais.setIdEstado(Constant.IND_ESTADO_INACTIVO);
 		} else {
-			tvvpPais.setIdEstado(ViConstant.IND_ESTADO_ACTIVO);
+			tevpPais.setIdEstado(Constant.IND_ESTADO_ACTIVO);
 		}
-		return tvvpPaisRepository.save(tvvpPais);
+		return tevpPaisRepository.save(tevpPais);
 	}
 	
 	@Override
-	public Mono<TvvpPais> logicRemove(String id) {
-		TvvpPais tvvpPais = tvvpPaisRepository.findById(id).block();
-		tvvpPais.setIdEstado(ViConstant.IND_ESTADO_ELIMINADO);
-		return tvvpPaisRepository.save(tvvpPais);
+	public Mono<TevpPais> logicRemove(String id) {
+		TevpPais tevpPais = tevpPaisRepository.findById(id).block();
+		tevpPais.setIdEstado(Constant.IND_ESTADO_ELIMINADO);
+		return tevpPaisRepository.save(tevpPais);
 	}
 
 }

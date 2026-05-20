@@ -12,16 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import co.com.vimodules.admmodule.model.TvvnVariableSistema;
-import co.com.vimodules.admmodule.repository.itf.TvvnErrorRepository;
-import co.com.vimodules.admmodule.repository.itf.TvvnVariableSistemaRepository;
-import co.com.vimodules.admmodule.service.itf.TvvnVariableSistemaService;
-import co.com.vimodules.admmodule.utils.UtilConverter;
-import co.com.vimodules.admmodule.utils.ViConstant;
-import co.com.vimodules.admmodule.utils.ViGeneral;
-import co.com.vimodules.admmodule.model.TvvnError;
-import co.com.vimodules.admmodule.model.TvvnEstado;
-import co.com.vimodules.admmodule.utils.exception.ViValidationException;
+import com.enviexpres.logistica.admmodule.model.TevnError;
+import com.enviexpres.logistica.admmodule.model.TevnEstado;
+import com.enviexpres.logistica.admmodule.model.TevnVariableSistema;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnErrorRepository;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnVariableSistemaRepository;
+import com.enviexpres.logistica.admmodule.service.itf.TevnVariableSistemaService;
+import com.enviexpres.logistica.admmodule.utils.Constant;
+import com.enviexpres.logistica.admmodule.utils.UtilConverter;
+import com.enviexpres.logistica.admmodule.utils.UtilsGeneral;
+import com.enviexpres.logistica.admmodule.utils.exception.ValidationException;
+
 import io.micrometer.common.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,117 +31,117 @@ import reactor.core.publisher.Mono;
 public class TevnVariableSistemaServiceImp implements TevnVariableSistemaService {
 
 	@Autowired
-	TvvnVariableSistemaRepository tvvnVariableSistemaRepository;
+	TevnVariableSistemaRepository tevnVariableSistemaRepository;
 	
 	@Autowired
-	TvvnErrorRepository tvvnErrorRepository;
+	TevnErrorRepository tevnErrorRepository;
 	
 	@Override
-	public Mono<TvvnVariableSistema> create(Map<String, String> entity) {
-		TvvnVariableSistema tvvnVariableSistema = new TvvnVariableSistema();
+	public Mono<TevnVariableSistema> create(Map<String, String> entity) {
+		TevnVariableSistema tevnVariableSistema = new TevnVariableSistema();
 		if(StringUtils.isEmpty(entity.get("idVariable"))) {
-			Flux<TvvnVariableSistema> tvvnVariableSistemaFlux = tvvnVariableSistemaRepository.findAll();
-			TvvnVariableSistema tvvnVariableSistemaLast = tvvnVariableSistemaFlux.blockLast();
-			String lastId = Objects.isNull(tvvnVariableSistemaLast) ? "0" : tvvnVariableSistemaLast.getIdVariable();
-			tvvnVariableSistema.setIdVariable(ViGeneral.devolverConsecutivo4Digitos(lastId));
+			Flux<TevnVariableSistema> tevnVariableSistemaFlux = tevnVariableSistemaRepository.findAll();
+			TevnVariableSistema tevnVariableSistemaLast = tevnVariableSistemaFlux.blockLast();
+			String lastId = Objects.isNull(tevnVariableSistemaLast) ? "0" : tevnVariableSistemaLast.getIdVariable();
+			tevnVariableSistema.setIdVariable(UtilsGeneral.devolverConsecutivo4Digitos(lastId));
 		} else {
-			tvvnVariableSistema = tvvnVariableSistemaRepository.findByIdVariable(entity.get("idVariable")).block();
+			tevnVariableSistema = tevnVariableSistemaRepository.findByIdVariable(entity.get("idVariable")).block();
 		}
-		tvvnVariableSistema.setNmVariable(entity.get("nmVariable"));
-		tvvnVariableSistema.setValor(entity.get("valor"));
-		tvvnVariableSistema.setDsVariable(entity.get("dsVariable"));
-		tvvnVariableSistema.setTipo(StringUtils.isEmpty(entity.get("tipo")) ? ViConstant.VARIABLE_TIPO_CONFIGURACION : entity.get("tipo"));
-		tvvnVariableSistema.setIdEstado(StringUtils.isEmpty(entity.get("idEstado")) ? ViConstant.IND_ESTADO_ACTIVO : entity.get("idEstado"));
-		return tvvnVariableSistemaRepository.save(tvvnVariableSistema);
+		tevnVariableSistema.setNmVariable(entity.get("nmVariable"));
+		tevnVariableSistema.setValor(entity.get("valor"));
+		tevnVariableSistema.setDsVariable(entity.get("dsVariable"));
+		tevnVariableSistema.setTipo(StringUtils.isEmpty(entity.get("tipo")) ? Constant.VARIABLE_TIPO_CONFIGURACION : entity.get("tipo"));
+		tevnVariableSistema.setIdEstado(StringUtils.isEmpty(entity.get("idEstado")) ? Constant.IND_ESTADO_ACTIVO : entity.get("idEstado"));
+		return tevnVariableSistemaRepository.save(tevnVariableSistema);
 	}
 
 	@Override
-	public Mono<TvvnVariableSistema> findById(String id) {
-		return tvvnVariableSistemaRepository.findById(id);
+	public Mono<TevnVariableSistema> findById(String id) {
+		return tevnVariableSistemaRepository.findById(id);
 	}
 
 	@Override
-	public Flux<TvvnVariableSistema> findAll() {
-		return tvvnVariableSistemaRepository.findAll();
+	public Flux<TevnVariableSistema> findAll() {
+		return tevnVariableSistemaRepository.findAll();
 	}
 
 	@Override
 	public Mono<Void> remove(String id) {
-		return tvvnVariableSistemaRepository.deleteById(id);
+		return tevnVariableSistemaRepository.deleteById(id);
 	}
 
 	@Override
-	public Flux<TvvnVariableSistema> createVarious(List<Map<String, Object>> entityList) {
+	public Flux<TevnVariableSistema> createVarious(List<Map<String, Object>> entityList) {
 		
 		if(Objects.isNull(entityList)) {
 			return null;
 		}
 		
-		String lastId = tvvnVariableSistemaRepository.findAll().blockLast().getIdVariable();
-		TvvnVariableSistema tvvnVariableSistema = new TvvnVariableSistema();
-		tvvnVariableSistema.setIdVariable(lastId);
+		String lastId = tevnVariableSistemaRepository.findAll().blockLast().getIdVariable();
+		TevnVariableSistema tevnVariableSistema = new TevnVariableSistema();
+		tevnVariableSistema.setIdVariable(lastId);
 		
-		Iterable<TvvnVariableSistema> tvvnVariableSistemaIterable = entityList.stream()
-				.map(tvvnVariableSistemaMap -> {
-					tvvnVariableSistema.setIdVariable(ViGeneral.devolverConsecutivo4Digitos(tvvnVariableSistema.getIdVariable()));
-					tvvnVariableSistema.setNmVariable(String.valueOf(tvvnVariableSistemaMap.get("nmVariable")));
-					tvvnVariableSistema.setValor(String.valueOf(tvvnVariableSistemaMap.get("valor")));
-					tvvnVariableSistema.setDsVariable(String.valueOf(tvvnVariableSistemaMap.get("dsVariable")));
-					tvvnVariableSistema.setIdEstado(Objects.isNull(tvvnVariableSistemaMap.get("idEstado")) ? ViConstant.IND_ESTADO_ACTIVO : String.valueOf(tvvnVariableSistemaMap.get("idEstado")));
-					return tvvnVariableSistema;
+		Iterable<TevnVariableSistema> tevnVariableSistemaIterable = entityList.stream()
+				.map(tevnVariableSistemaMap -> {
+					tevnVariableSistema.setIdVariable(UtilsGeneral.devolverConsecutivo4Digitos(tevnVariableSistema.getIdVariable()));
+					tevnVariableSistema.setNmVariable(String.valueOf(tevnVariableSistemaMap.get("nmVariable")));
+					tevnVariableSistema.setValor(String.valueOf(tevnVariableSistemaMap.get("valor")));
+					tevnVariableSistema.setDsVariable(String.valueOf(tevnVariableSistemaMap.get("dsVariable")));
+					tevnVariableSistema.setIdEstado(Objects.isNull(tevnVariableSistemaMap.get("idEstado")) ? Constant.IND_ESTADO_ACTIVO : String.valueOf(tevnVariableSistemaMap.get("idEstado")));
+					return tevnVariableSistema;
 				})
 				.collect(Collectors.toList());
-		return tvvnVariableSistemaRepository.saveAll(tvvnVariableSistemaIterable);
+		return tevnVariableSistemaRepository.saveAll(tevnVariableSistemaIterable);
 	}
 
 	@Override
 	public Flux<Map<String, Object>> findIfContains(Map<String, String> filter) {
-		List<Map<String, Object>> tvvnVariableSistemaMapList = new ArrayList<Map<String, Object>>();
-		Flux<Document> tvvnVariableSistemaFlux = tvvnVariableSistemaRepository.findIfContains(filter);
-		tvvnVariableSistemaFlux.map(document -> {
+		List<Map<String, Object>> tevnVariableSistemaMapList = new ArrayList<Map<String, Object>>();
+		Flux<Document> tevnVariableSistemaFlux = tevnVariableSistemaRepository.findIfContains(filter);
+		tevnVariableSistemaFlux.map(document -> {
 			Map<String, Object> resultMap = new HashMap<>();
 			for(String key : document.keySet()) {
 				resultMap.put(key, document.get(key));
 			}
 			return resultMap;
-		}).collectList().block().stream().forEach(tvvnVariableSistemaObject -> {
+		}).collectList().block().stream().forEach(tevnVariableSistemaObject -> {
 			try {
-				Map<String, Object> tvvnVariableSistemaMap = new HashMap<>();
-				TvvnVariableSistema tvvnVariableSistema = UtilConverter.documentToClass(TvvnVariableSistema.class, (Document) tvvnVariableSistemaObject.get("tvvn_variable_sistema"));
-				TvvnEstado tvvnEstado = Objects.isNull(tvvnVariableSistemaObject.get("tvvn_estado")) ? null : UtilConverter.documentToClass(TvvnEstado.class, (Document) tvvnVariableSistemaObject.get("tvvn_estado"));
-				tvvnVariableSistemaMap = UtilConverter.classToMap(tvvnVariableSistema);
-				tvvnVariableSistemaMap.put("nmEstado", Objects.isNull(tvvnEstado) ? "" : tvvnEstado.getNmEstado());
-				tvvnVariableSistemaMap.put("sbEstado", Objects.isNull(tvvnEstado) ? "" : tvvnEstado.getSbEstado());
-				tvvnVariableSistemaMap.put("colorEstado", Objects.isNull(tvvnEstado) ? "" : tvvnEstado.getColor());
-				tvvnVariableSistemaMapList.add(tvvnVariableSistemaMap);
+				Map<String, Object> tevnVariableSistemaMap = new HashMap<>();
+				TevnVariableSistema tevnVariableSistema = UtilConverter.documentToClass(TevnVariableSistema.class, (Document) tevnVariableSistemaObject.get("tevn_variable_sistema"));
+				TevnEstado tevnEstado = Objects.isNull(tevnVariableSistemaObject.get("tevn_estado")) ? null : UtilConverter.documentToClass(TevnEstado.class, (Document) tevnVariableSistemaObject.get("tevn_estado"));
+				tevnVariableSistemaMap = UtilConverter.classToMap(tevnVariableSistema);
+				tevnVariableSistemaMap.put("nmEstado", Objects.isNull(tevnEstado) ? "" : tevnEstado.getNmEstado());
+				tevnVariableSistemaMap.put("sbEstado", Objects.isNull(tevnEstado) ? "" : tevnEstado.getSbEstado());
+				tevnVariableSistemaMap.put("colorEstado", Objects.isNull(tevnEstado) ? "" : tevnEstado.getColor());
+				tevnVariableSistemaMapList.add(tevnVariableSistemaMap);
 			} catch(IllegalAccessException | InstantiationException e) {
-				TvvnError tvvnError = ViGeneral.createError(e, ViConstant.MODULO_ATOM);
-				tvvnErrorRepository.save(tvvnError);
-				throw new ViValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.SinInformacion");
+				TevnError tevnError = UtilConverter.createError(e, Constant.MODULO_ADM);
+				tevnErrorRepository.save(tevnError);
+				throw new ValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.SinInformacion");
 			}
 		});
 		
-		Flux<Map<String, Object>> tvvnVariableSistemaMapFlux = Flux.fromIterable(tvvnVariableSistemaMapList);
-		return tvvnVariableSistemaMapFlux;
+		Flux<Map<String, Object>> tevnVariableSistemaMapFlux = Flux.fromIterable(tevnVariableSistemaMapList);
+		return tevnVariableSistemaMapFlux;
 	}
 
 	@Override
-	public Mono<TvvnVariableSistema> toggle(Map<String, String> entity) {
-		TvvnVariableSistema tvvnVariableSistema = tvvnVariableSistemaRepository.findById(entity.get("idVariable")).block();
-		if(!Objects.isNull(tvvnVariableSistema)) {
-			tvvnVariableSistema.setIdEstado(entity.get("idEstado"));
-			return tvvnVariableSistemaRepository.save(tvvnVariableSistema);
+	public Mono<TevnVariableSistema> toggle(Map<String, String> entity) {
+		TevnVariableSistema tevnVariableSistema = tevnVariableSistemaRepository.findById(entity.get("idVariable")).block();
+		if(!Objects.isNull(tevnVariableSistema)) {
+			tevnVariableSistema.setIdEstado(entity.get("idEstado"));
+			return tevnVariableSistemaRepository.save(tevnVariableSistema);
 		} else {
 			return null;
 		}
 	}
 
 	@Override
-	public Mono<TvvnVariableSistema> logicRemove(String id) {
-		TvvnVariableSistema tvvnVariableSistema = tvvnVariableSistemaRepository.findById(id).block();
-		if(!Objects.isNull(tvvnVariableSistema)) {
-			tvvnVariableSistema.setIdEstado(ViConstant.IND_ESTADO_ELIMINADO);
-			return tvvnVariableSistemaRepository.save(tvvnVariableSistema);
+	public Mono<TevnVariableSistema> logicRemove(String id) {
+		TevnVariableSistema tevnVariableSistema = tevnVariableSistemaRepository.findById(id).block();
+		if(!Objects.isNull(tevnVariableSistema)) {
+			tevnVariableSistema.setIdEstado(Constant.IND_ESTADO_ELIMINADO);
+			return tevnVariableSistemaRepository.save(tevnVariableSistema);
 		} else {
 			return null;
 		}

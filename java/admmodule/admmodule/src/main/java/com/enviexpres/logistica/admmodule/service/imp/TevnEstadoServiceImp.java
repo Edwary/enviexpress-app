@@ -8,65 +8,65 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import co.com.vimodules.admmodule.model.TvvnEstado;
-import co.com.vimodules.admmodule.repository.itf.TvvnEstadoRepository;
-import co.com.vimodules.admmodule.service.itf.TvvnEstadoService;
-import co.com.vimodules.admmodule.utils.UtilConverter;
-import co.com.vimodules.admmodule.utils.ViConstant;
-import co.com.vimodules.admmodule.utils.ViGeneral;
+import com.enviexpres.logistica.admmodule.model.TevnEstado;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnEstadoRepository;
+import com.enviexpres.logistica.admmodule.service.itf.TevnEstadoService;
+import com.enviexpres.logistica.admmodule.utils.Constant;
+import com.enviexpres.logistica.admmodule.utils.UtilsGeneral;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-public class TevnEstadoServiceImp implements TvvnEstadoService {
+public class TevnEstadoServiceImp implements TevnEstadoService {
 
 	@Autowired
-	private TvvnEstadoRepository tvvnEstadoRepository;
+	private TevnEstadoRepository TevnEstadoRepository;
 	
 	@Override
-	public Mono<TvvnEstado> create(TvvnEstado tvvnEstado) {
-		if(Objects.isNull(tvvnEstado.getIdEstado())){
-			Flux<TvvnEstado> tvvnEstadoFlux = tvvnEstadoRepository.findAll();
-			List<TvvnEstado> tvvnEstadoIfContains = tvvnEstadoFlux.toStream()
-					.filter(estado -> estado.getNmEstado().equals(tvvnEstado.getNmEstado()) || estado.getSbEstado().equals(tvvnEstado.getSbEstado()) || estado.getColor().equals(tvvnEstado.getColor()))
+	public Mono<TevnEstado> create(TevnEstado TevnEstado) {
+		if(Objects.isNull(TevnEstado.getIdEstado())){
+			Flux<TevnEstado> TevnEstadoFlux = TevnEstadoRepository.findAll();
+			List<TevnEstado> TevnEstadoIfContains = TevnEstadoFlux.toStream()
+					.filter(estado -> estado.getNmEstado().equals(TevnEstado.getNmEstado()) || estado.getSbEstado().equals(TevnEstado.getSbEstado()) || estado.getColor().equals(TevnEstado.getColor()))
 					.collect(Collectors.toList());
-			if(tvvnEstado.getNmEstado().isEmpty() || tvvnEstado.getSbEstado().isEmpty() || tvvnEstado.getColor().isEmpty() || tvvnEstado.getModulo().isEmpty()) return null;
-			if(tvvnEstadoIfContains.size() > 0) return null;
-			if(tvvnEstadoFlux.count().block() > 0L) {
-				String valueId = ViGeneral.devolverConsecutivo4Digitos(tvvnEstadoFlux.last().block().getIdEstado());
-				tvvnEstado.setIdEstado(valueId);
+			if(TevnEstado.getNmEstado().isEmpty() || TevnEstado.getSbEstado().isEmpty() || TevnEstado.getColor().isEmpty() || TevnEstado.getModulo().isEmpty()) return null;
+			if(TevnEstadoIfContains.size() > 0) return null;
+			if(TevnEstadoFlux.count().block() > 0L) {
+				String valueId = UtilsGeneral.devolverConsecutivo4Digitos(TevnEstadoFlux.last().block().getIdEstado());
+				TevnEstado.setIdEstado(valueId);
 			}else {
-				tvvnEstado.setIdEstado("0001");
+				TevnEstado.setIdEstado("0001");
 			}
-			return tvvnEstadoRepository.save(tvvnEstado);
+			return TevnEstadoRepository.save(TevnEstado);
 		}else {
-			return tvvnEstadoRepository.save(tvvnEstado);
+			return TevnEstadoRepository.save(TevnEstado);
 		}
 	}
 
 	@Override
-	public Mono<TvvnEstado> findById(String id) {
-		return tvvnEstadoRepository.findById(id);
+	public Mono<TevnEstado> findById(String id) {
+		return TevnEstadoRepository.findById(id);
 	}
 
 	@Override
-	public Flux<TvvnEstado> findAll() {
-		return tvvnEstadoRepository.findAll();
+	public Flux<TevnEstado> findAll() {
+		return TevnEstadoRepository.findAll();
 	}
 
 	@Override
 	public Mono<Void> remove(String id) {
-		TvvnEstado tvvnEstado = tvvnEstadoRepository.findById(id).block();
-		if(tvvnEstado.getModulo().equals(ViConstant.MODULO_TODOS)) {
+		TevnEstado TevnEstado = TevnEstadoRepository.findById(id).block();
+		if(TevnEstado.getModulo().equals(Constant.MODULO_TODOS)) {
 			return null;
 		} else {
-			return tvvnEstadoRepository.delete(tvvnEstado);
+			return TevnEstadoRepository.delete(TevnEstado);
 		}
 	}
 
 	@Override
-	public Flux<TvvnEstado> findIfContains(Map<String, String> filter) {
-		return tvvnEstadoRepository.findIfContains(filter);
+	public Flux<TevnEstado> findIfContains(Map<String, String> filter) {
+		return TevnEstadoRepository.findIfContains(filter);
 	}
 
 }

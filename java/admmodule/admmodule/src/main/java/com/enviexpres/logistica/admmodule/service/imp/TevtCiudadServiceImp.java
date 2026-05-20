@@ -12,20 +12,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import co.com.vimodules.admmodule.configuration.ApiConsumer;
-import co.com.vimodules.admmodule.model.TvvnError;
-import co.com.vimodules.admmodule.model.TvvnEstado;
-import co.com.vimodules.admmodule.model.TvvpPais;
-import co.com.vimodules.admmodule.model.TvvsDepartamento;
-import co.com.vimodules.admmodule.model.TvvtCiudad;
-import co.com.vimodules.admmodule.repository.itf.TvvnErrorRepository;
-import co.com.vimodules.admmodule.repository.itf.TvvsDepartamentoRepository;
-import co.com.vimodules.admmodule.repository.itf.TvvtCiudadRepository;
-import co.com.vimodules.admmodule.service.itf.TvvtCiudadService;
-import co.com.vimodules.admmodule.utils.UtilConverter;
-import co.com.vimodules.admmodule.utils.ViConstant;
-import co.com.vimodules.admmodule.utils.ViGeneral;
-import co.com.vimodules.admmodule.utils.exception.ViValidationException;
+import com.enviexpres.logistica.admmodule.configuration.ApiConsumer;
+import com.enviexpres.logistica.admmodule.model.TevnError;
+import com.enviexpres.logistica.admmodule.model.TevnEstado;
+import com.enviexpres.logistica.admmodule.model.TevpPais;
+import com.enviexpres.logistica.admmodule.model.TevsDepartamento;
+import com.enviexpres.logistica.admmodule.model.TevtCiudad;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnErrorRepository;
+import com.enviexpres.logistica.admmodule.repository.itf.TevsDepartamentoRepository;
+import com.enviexpres.logistica.admmodule.repository.itf.TevtCiudadRepository;
+import com.enviexpres.logistica.admmodule.service.itf.TevtCiudadService;
+import com.enviexpres.logistica.admmodule.utils.Constant;
+import com.enviexpres.logistica.admmodule.utils.UtilConverter;
+import com.enviexpres.logistica.admmodule.utils.UtilsGeneral;
+import com.enviexpres.logistica.admmodule.utils.exception.ValidationException;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,178 +34,178 @@ import reactor.core.publisher.Mono;
 public class TevtCiudadServiceImp implements TevtCiudadService {
 
 	@Autowired
-	private TvvsDepartamentoRepository tvvsDepartamentoRepository;
+	private TevsDepartamentoRepository tevsDepartamentoRepository;
 	
 	@Autowired
-	private TvvtCiudadRepository tvvtCiudadRepository;
+	private TevtCiudadRepository tevtCiudadRepository;
 
 	@Autowired
-	private TvvnErrorRepository tvvnErrorRepository;
+	private TevnErrorRepository tevnErrorRepository;
 	
-	private static String MODULO = ViConstant.MODULO_ADM;
+	private static String MODULO = Constant.MODULO_ADM;
 	
 	ApiConsumer apiConsumer = new ApiConsumer();
 	
 	@Override
-	public Mono<TvvtCiudad> create(Map<String, Object> entity) {
-		TvvtCiudad tvvtCiudad = new TvvtCiudad();
-		tvvtCiudad.setIdCiudad(String.valueOf(entity.get("idCiudad")));
-		tvvtCiudad.setNmCiudad(String.valueOf(entity.get("nmCiudad")));
-		tvvtCiudad.setSbCiudad(String.valueOf(entity.get("sbCiudad")));
-		tvvtCiudad.setCodigoPostal(String.valueOf(entity.get("codigoPostal")));
-		tvvtCiudad.setCodigoDane(String.valueOf(entity.get("codigoDane")));
-		tvvtCiudad.setSubRegion(String.valueOf(entity.get("subRegion")));
-		tvvtCiudad.setTipo(String.valueOf(entity.get("tipo")));
-		tvvtCiudad.setIdDepartamento(String.valueOf(entity.get("idDepartamento")));
-		tvvtCiudad.setIdEstado(String.valueOf(entity.get("idEstado")));
-		return tvvtCiudadRepository.save(tvvtCiudad);
+	public Mono<TevtCiudad> create(Map<String, Object> entity) {
+		TevtCiudad tevtCiudad = new TevtCiudad();
+		tevtCiudad.setIdCiudad(String.valueOf(entity.get("idCiudad")));
+		tevtCiudad.setNmCiudad(String.valueOf(entity.get("nmCiudad")));
+		tevtCiudad.setSbCiudad(String.valueOf(entity.get("sbCiudad")));
+		tevtCiudad.setCodigoPostal(String.valueOf(entity.get("codigoPostal")));
+		tevtCiudad.setCodigoDane(String.valueOf(entity.get("codigoDane")));
+		tevtCiudad.setSubRegion(String.valueOf(entity.get("subRegion")));
+		tevtCiudad.setTipo(String.valueOf(entity.get("tipo")));
+		tevtCiudad.setIdDepartamento(String.valueOf(entity.get("idDepartamento")));
+		tevtCiudad.setIdEstado(String.valueOf(entity.get("idEstado")));
+		return tevtCiudadRepository.save(tevtCiudad);
 	}
 
 	@Override
-	public Mono<TvvtCiudad> findById(String id) {
-		return tvvtCiudadRepository.findById(id);
+	public Mono<TevtCiudad> findById(String id) {
+		return tevtCiudadRepository.findById(id);
 	}
 
 	@Override
-	public Flux<TvvtCiudad> findAll() {
-		List<TvvtCiudad> tvvtCiudadList = tvvtCiudadRepository.findAll().toStream().filter(c -> !c.getIdEstado().equals(ViConstant.IND_ESTADO_ELIMINADO)).collect(Collectors.toList());
-		return Flux.fromIterable(tvvtCiudadList);
+	public Flux<TevtCiudad> findAll() {
+		List<TevtCiudad> tevtCiudadList = tevtCiudadRepository.findAll().toStream().filter(c -> !c.getIdEstado().equals(Constant.IND_ESTADO_ELIMINADO)).collect(Collectors.toList());
+		return Flux.fromIterable(tevtCiudadList);
 	}
 
 	@Override
 	public Mono<Void> remove(String id) {
-		TvvtCiudad tvvtCiudad = tvvtCiudadRepository.findById(id).block();
-		return tvvtCiudadRepository.delete(tvvtCiudad);
+		TevtCiudad tevtCiudad = tevtCiudadRepository.findById(id).block();
+		return tevtCiudadRepository.delete(tevtCiudad);
 	}
 
 	@Override
-	public Flux<TvvtCiudad> createVarious(List<Map<String, Object>> entityList) {
+	public Flux<TevtCiudad> createVarious(List<Map<String, Object>> entityList) {
 		
 		if(Objects.isNull(entityList)) {
 			return null;
 		}
 		
-		Iterable<TvvtCiudad> tvvtCiudadIterable = entityList.stream()
-				.map(tvvtCiudadMap -> {
-					TvvtCiudad tvvtCiudad = new TvvtCiudad();
-					tvvtCiudad.setIdCiudad(String.valueOf(tvvtCiudadMap.get("idCiudad")));
-					tvvtCiudad.setNmCiudad(String.valueOf(tvvtCiudadMap.get("nmCiudad")));
-					tvvtCiudad.setSbCiudad(String.valueOf(tvvtCiudadMap.get("sbCiudad")));
-					tvvtCiudad.setCodigoPostal(String.valueOf(tvvtCiudadMap.get("codigoPostal")));
-					tvvtCiudad.setCodigoDane(String.valueOf(tvvtCiudadMap.get("codigoDane")));
-					tvvtCiudad.setSubRegion(String.valueOf(tvvtCiudadMap.get("subRegion")));
-					tvvtCiudad.setTipo(String.valueOf(tvvtCiudadMap.get("tipo")));
-					tvvtCiudad.setIdDepartamento(String.valueOf(tvvtCiudadMap.get("idDepartamento")));
-					tvvtCiudad.setIdEstado(String.valueOf(tvvtCiudadMap.get("idEstado")));
-					return tvvtCiudad;
+		Iterable<TevtCiudad> tevtCiudadIterable = entityList.stream()
+				.map(tevtCiudadMap -> {
+					TevtCiudad tevtCiudad = new TevtCiudad();
+					tevtCiudad.setIdCiudad(String.valueOf(tevtCiudadMap.get("idCiudad")));
+					tevtCiudad.setNmCiudad(String.valueOf(tevtCiudadMap.get("nmCiudad")));
+					tevtCiudad.setSbCiudad(String.valueOf(tevtCiudadMap.get("sbCiudad")));
+					tevtCiudad.setCodigoPostal(String.valueOf(tevtCiudadMap.get("codigoPostal")));
+					tevtCiudad.setCodigoDane(String.valueOf(tevtCiudadMap.get("codigoDane")));
+					tevtCiudad.setSubRegion(String.valueOf(tevtCiudadMap.get("subRegion")));
+					tevtCiudad.setTipo(String.valueOf(tevtCiudadMap.get("tipo")));
+					tevtCiudad.setIdDepartamento(String.valueOf(tevtCiudadMap.get("idDepartamento")));
+					tevtCiudad.setIdEstado(String.valueOf(tevtCiudadMap.get("idEstado")));
+					return tevtCiudad;
 				})
 				.collect(Collectors.toList());
 		
-		return tvvtCiudadRepository.saveAll(tvvtCiudadIterable);
+		return tevtCiudadRepository.saveAll(tevtCiudadIterable);
 	}
 
 	@Override
 	public Flux<Map<String, Object>> findIfContains(Map<String, String> filter) {
-		List<Map<String, Object>> tvvtCiudadesMapList = new ArrayList<Map<String, Object>>();
-		Flux<Document> tvvtCiudadObjectFlux = tvvtCiudadRepository.findObjectIfContains(filter);
-		tvvtCiudadObjectFlux.map(document -> {
+		List<Map<String, Object>> tevtCiudadesMapList = new ArrayList<Map<String, Object>>();
+		Flux<Document> tevtCiudadObjectFlux = tevtCiudadRepository.findObjectIfContains(filter);
+		tevtCiudadObjectFlux.map(document -> {
 			Map<String, Object> resultMap = new HashMap<>();
 			for(String key : document.keySet()) {
 				resultMap.put(key, document.get(key));
 			}
 			return resultMap;
 		}).collectList().block().stream()
-		.forEach(tvvtCiudadObject -> {
+		.forEach(tevtCiudadObject -> {
 			try {
-				Map<String, Object> tvvtCiudadMap = new HashMap<>();
-				TvvtCiudad tvvtCiudad = UtilConverter.documentToClass(TvvtCiudad.class, (Document) tvvtCiudadObject.get("tvvt_ciudad"));
-				if(!tvvtCiudad.getIdEstado().equals(ViConstant.IND_ESTADO_ELIMINADO)) {
-					TvvsDepartamento tvvsDepartamento = UtilConverter.documentToClass(TvvsDepartamento.class, (Document) tvvtCiudadObject.get("tvvs_departamento"));
-					TvvpPais tvvpPais = UtilConverter.documentToClass(TvvpPais.class, (Document) tvvtCiudadObject.get("tvvp_pais"));
-					TvvnEstado tvvnEstado = UtilConverter.documentToClass(TvvnEstado.class, (Document) tvvtCiudadObject.get("tvvn_estado"));
-					tvvtCiudadMap = UtilConverter.classToMap(tvvtCiudad);
-					tvvtCiudadMap.put("nmDepartamento", tvvsDepartamento.getNmDepartamento());
-					tvvtCiudadMap.put("sbDepartamento", tvvsDepartamento.getSbDepartamento());
-					tvvtCiudadMap.put("nmPais", tvvpPais.getNmPais());
-					tvvtCiudadMap.put("sbPais", tvvpPais.getSbPais());
-					tvvtCiudadMap.put("nmEstado", tvvnEstado.getNmEstado());
-					tvvtCiudadMap.put("sbEstado", tvvnEstado.getSbEstado());
-					tvvtCiudadesMapList.add(tvvtCiudadMap);
+				Map<String, Object> tevtCiudadMap = new HashMap<>();
+				TevtCiudad tevtCiudad = UtilConverter.documentToClass(TevtCiudad.class, (Document) tevtCiudadObject.get("tevt_ciudad"));
+				if(!tevtCiudad.getIdEstado().equals(Constant.IND_ESTADO_ELIMINADO)) {
+					TevsDepartamento tevsDepartamento = UtilConverter.documentToClass(TevsDepartamento.class, (Document) tevtCiudadObject.get("tevs_departamento"));
+					TevpPais tevpPais = UtilConverter.documentToClass(TevpPais.class, (Document) tevtCiudadObject.get("tevp_pais"));
+					TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) tevtCiudadObject.get("tevn_estado"));
+					tevtCiudadMap = UtilConverter.classToMap(tevtCiudad);
+					tevtCiudadMap.put("nmDepartamento", tevsDepartamento.getNmDepartamento());
+					tevtCiudadMap.put("sbDepartamento", tevsDepartamento.getSbDepartamento());
+					tevtCiudadMap.put("nmPais", tevpPais.getNmPais());
+					tevtCiudadMap.put("sbPais", tevpPais.getSbPais());
+					tevtCiudadMap.put("nmEstado", tevnEstado.getNmEstado());
+					tevtCiudadMap.put("sbEstado", tevnEstado.getSbEstado());
+					tevtCiudadesMapList.add(tevtCiudadMap);
 				}
 			} catch (IllegalAccessException | InstantiationException e) {
-				TvvnError tvvnError = ViGeneral.createError(e, MODULO);
-				tvvnErrorRepository.save(tvvnError);
-				throw new ViValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.InformacionUsuario");
+				TevnError tevnError = UtilConverter.createError(e, MODULO);
+				tevnErrorRepository.save(tevnError);
+				throw new ValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.InformacionUsuario");
 			}
 		});
-		Flux<Map<String, Object>> tvvtCiudadesMapFlux = Flux.fromIterable(tvvtCiudadesMapList);
-		return tvvtCiudadesMapFlux;
+		Flux<Map<String, Object>> tevtCiudadesMapFlux = Flux.fromIterable(tevtCiudadesMapList);
+		return tevtCiudadesMapFlux;
 	}
 
 	@Override
-	public Mono<TvvtCiudad> toggleCiudad(String id) {
-		TvvtCiudad tvvtCiudad = tvvtCiudadRepository.findById(id).block();
-		if(tvvtCiudad.getIdEstado().equals(ViConstant.IND_ESTADO_ACTIVO)) {
-			tvvtCiudad.setIdEstado(ViConstant.IND_ESTADO_INACTIVO);
+	public Mono<TevtCiudad> toggleCiudad(String id) {
+		TevtCiudad tevtCiudad = tevtCiudadRepository.findById(id).block();
+		if(tevtCiudad.getIdEstado().equals(Constant.IND_ESTADO_ACTIVO)) {
+			tevtCiudad.setIdEstado(Constant.IND_ESTADO_INACTIVO);
 		} else {
-			tvvtCiudad.setIdEstado(ViConstant.IND_ESTADO_ACTIVO);
+			tevtCiudad.setIdEstado(Constant.IND_ESTADO_ACTIVO);
 		}
-		return tvvtCiudadRepository.save(tvvtCiudad);
+		return tevtCiudadRepository.save(tevtCiudad);
 	}
 
 	@Override
-	public Mono<TvvtCiudad> logicRemove(String id) {
-		TvvtCiudad tvvtCiudad = tvvtCiudadRepository.findById(id).block();
-		tvvtCiudad.setIdEstado(ViConstant.IND_ESTADO_ELIMINADO);
-		return tvvtCiudadRepository.save(tvvtCiudad);
+	public Mono<TevtCiudad> logicRemove(String id) {
+		TevtCiudad tevtCiudad = tevtCiudadRepository.findById(id).block();
+		tevtCiudad.setIdEstado(Constant.IND_ESTADO_ELIMINADO);
+		return tevtCiudadRepository.save(tevtCiudad);
 	}
 	
 	@Override
-	public Flux<TvvtCiudad> actualizarCiudades() {
+	public Flux<TevtCiudad> actualizarCiudades() {
 		
-		//Flux<TvvsDepartamento> tvvsDepartamentoFlux = tvvsDepartamentoRepository.findAll();
-		Flux<TvvtCiudad> tvvtCiudadFlux = tvvtCiudadRepository.findAll();
-		List<TvvtCiudad> tvvtCiudadFluxList = tvvtCiudadFlux.collectList().block();
-		tvvtCiudadFlux.toStream().forEach(ciudad -> ciudad.setIdEstado(ViConstant.IND_ESTADO_INACTIVO));
-		tvvtCiudadRepository.saveAll(tvvtCiudadFlux.toIterable());
+		//Flux<TevsDepartamento> tevsDepartamentoFlux = tevsDepartamentoRepository.findAll();
+		Flux<TevtCiudad> tevtCiudadFlux = tevtCiudadRepository.findAll();
+		List<TevtCiudad> tevtCiudadFluxList = tevtCiudadFlux.collectList().block();
+		tevtCiudadFlux.toStream().forEach(ciudad -> ciudad.setIdEstado(Constant.IND_ESTADO_INACTIVO));
+		tevtCiudadRepository.saveAll(tevtCiudadFlux.toIterable());
 		
-		List<String> tvvtCiudadDane = tvvtCiudadFlux.toStream().map(ciudad -> ciudad.getCodigoDane()).collect(Collectors.toList());
-		List<TvvtCiudad> tvvtCiudadList = new ArrayList<>();
-		Flux<Document> apiFlux = apiConsumer.fetchDataFromApi(ViConstant.API_MUNICIPIOS_GOV_CO);
+		List<String> tevtCiudadDane = tevtCiudadFlux.toStream().map(ciudad -> ciudad.getCodigoDane()).collect(Collectors.toList());
+		List<TevtCiudad> tevtCiudadList = new ArrayList<>();
+		Flux<Document> apiFlux = apiConsumer.fetchDataFromApi(Constant.API_MUNICIPIOS_GOV_CO);
 		apiFlux.toStream().forEach(apiCiudad -> {
 			String codigoDaneMunicipioApi = String.valueOf(apiCiudad.get("c_digo_dane_del_municipio")).replace(".", "");
 			String nmCiudadApi = String.valueOf(apiCiudad.get("municipio"));
 			String idDeptoApi = String.valueOf(apiCiudad.get("c_digo_dane_del_departamento"));
 			String regionApi = String.valueOf(apiCiudad.get("region"));
-			if(tvvtCiudadDane.contains(codigoDaneMunicipioApi)) {
-				TvvtCiudad tvvtCiudad = tvvtCiudadFlux.toStream().filter(ciudad -> ciudad.getCodigoDane().equals(codigoDaneMunicipioApi)).findFirst().orElse(null);
-				if(!Objects.isNull(tvvtCiudad)) {
-					tvvtCiudad.setCodigoDane(String.format("%05d", Long.valueOf(codigoDaneMunicipioApi)));
-					tvvtCiudad.setNmCiudad(nmCiudadApi);
-					tvvtCiudad.setSubRegion(regionApi);
-					tvvtCiudad.setIdDepartamento(String.format("%02d", Long.valueOf(idDeptoApi)));
-					tvvtCiudad.setCodigoPostal("");
-					tvvtCiudad.setSbCiudad(nmCiudadApi.toUpperCase().substring(0, 3));
-					tvvtCiudad.setTipo(ViConstant.TIPO_MUNICIPIO);
-					tvvtCiudad.setIdEstado(ViConstant.IND_ESTADO_ACTIVO);
-					tvvtCiudadList.add(tvvtCiudad);
+			if(tevtCiudadDane.contains(codigoDaneMunicipioApi)) {
+				TevtCiudad tevtCiudad = tevtCiudadFlux.toStream().filter(ciudad -> ciudad.getCodigoDane().equals(codigoDaneMunicipioApi)).findFirst().orElse(null);
+				if(!Objects.isNull(tevtCiudad)) {
+					tevtCiudad.setCodigoDane(String.format("%05d", Long.valueOf(codigoDaneMunicipioApi)));
+					tevtCiudad.setNmCiudad(nmCiudadApi);
+					tevtCiudad.setSubRegion(regionApi);
+					tevtCiudad.setIdDepartamento(String.format("%02d", Long.valueOf(idDeptoApi)));
+					tevtCiudad.setCodigoPostal("");
+					tevtCiudad.setSbCiudad(nmCiudadApi.toUpperCase().substring(0, 3));
+					tevtCiudad.setTipo(Constant.TIPO_MUNICIPIO);
+					tevtCiudad.setIdEstado(Constant.IND_ESTADO_ACTIVO);
+					tevtCiudadList.add(tevtCiudad);
 				}
 			} else {
-				TvvtCiudad tvvtCiudad = new TvvtCiudad();
-				tvvtCiudad.setIdCiudad(ViGeneral.devolverConsecutivo7Digitos(String.valueOf(tvvtCiudadFluxList.size())));
-				tvvtCiudad.setCodigoDane(String.format("%05d", Long.valueOf(codigoDaneMunicipioApi)));
-				tvvtCiudad.setNmCiudad(nmCiudadApi);
-				tvvtCiudad.setSubRegion(regionApi);
-				tvvtCiudad.setTipo(ViConstant.TIPO_MUNICIPIO);
-				tvvtCiudad.setIdDepartamento(String.format("%02d", Long.valueOf(idDeptoApi)));
-				tvvtCiudad.setCodigoPostal("");
-				tvvtCiudad.setSbCiudad(nmCiudadApi.toUpperCase().substring(0, 3));
-				tvvtCiudad.setIdEstado(ViConstant.IND_ESTADO_ACTIVO);
-				tvvtCiudadList.add(tvvtCiudad);
-				tvvtCiudadFluxList.add(tvvtCiudad);
+				TevtCiudad tevtCiudad = new TevtCiudad();
+				tevtCiudad.setIdCiudad(UtilsGeneral.devolverConsecutivo7Digitos(String.valueOf(tevtCiudadFluxList.size())));
+				tevtCiudad.setCodigoDane(String.format("%05d", Long.valueOf(codigoDaneMunicipioApi)));
+				tevtCiudad.setNmCiudad(nmCiudadApi);
+				tevtCiudad.setSubRegion(regionApi);
+				tevtCiudad.setTipo(Constant.TIPO_MUNICIPIO);
+				tevtCiudad.setIdDepartamento(String.format("%02d", Long.valueOf(idDeptoApi)));
+				tevtCiudad.setCodigoPostal("");
+				tevtCiudad.setSbCiudad(nmCiudadApi.toUpperCase().substring(0, 3));
+				tevtCiudad.setIdEstado(Constant.IND_ESTADO_ACTIVO);
+				tevtCiudadList.add(tevtCiudad);
+				tevtCiudadFluxList.add(tevtCiudad);
 			}
 		});
 		
-		return tvvtCiudadRepository.saveAll(tvvtCiudadList);
+		return tevtCiudadRepository.saveAll(tevtCiudadList);
 	}
 }

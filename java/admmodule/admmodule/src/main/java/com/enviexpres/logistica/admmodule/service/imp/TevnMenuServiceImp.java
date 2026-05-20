@@ -11,14 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import co.com.vimodules.admmodule.model.TvvnMenu;
-import co.com.vimodules.admmodule.repository.itf.TvvnErrorRepository;
-import co.com.vimodules.admmodule.repository.itf.TvvnMenuRepository;
-import co.com.vimodules.admmodule.service.itf.TvvnMenuService;
-import co.com.vimodules.admmodule.utils.IntComparator;
-import co.com.vimodules.admmodule.utils.UtilConverter;
-import co.com.vimodules.admmodule.utils.ViConstant;
-import co.com.vimodules.admmodule.utils.exception.ViValidationException;
+import com.enviexpres.logistica.admmodule.model.TevnMenu;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnMenuRepository;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnErrorRepository;
+import com.enviexpres.logistica.admmodule.service.itf.TevnMenuService;
+import com.enviexpres.logistica.admmodule.utils.Constant;
+import com.enviexpres.logistica.admmodule.utils.IntComparator;
+import com.enviexpres.logistica.admmodule.utils.UtilConverter;
+import com.enviexpres.logistica.admmodule.utils.exception.ValidationException;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,103 +27,103 @@ import reactor.core.publisher.Mono;
 public class TevnMenuServiceImp implements TevnMenuService {
 
 	@Autowired
-	private TevnMenuRepository tvvnMenuRepository;
+	private TevnMenuRepository TevnMenuRepository;
 	
 	@Autowired
-	private TvvnErrorRepository tvvnErrorRepository;
+	private TevnErrorRepository tevnErrorRepository;
 	
 	@Override
-	public Mono<TvvnMenu> create(Map<String, Object> entity) {
-		TvvnMenu tvvnMenu = null;
-		tvvnMenu = tvvnMenuRepository.findByIdMenu(String.valueOf(entity.get("idMenu"))).block();
-		if(Objects.isNull(tvvnMenu)) {
-			tvvnMenu = new TvvnMenu();
+	public Mono<TevnMenu> create(Map<String, Object> entity) {
+		TevnMenu TevnMenu = null;
+		TevnMenu = TevnMenuRepository.findByIdMenu(String.valueOf(entity.get("idMenu"))).block();
+		if(Objects.isNull(TevnMenu)) {
+			TevnMenu = new TevnMenu();
 		}
-		tvvnMenu.setIdMenu(String.valueOf(entity.get("idMenu")));
-		tvvnMenu.setNmMenu(String.valueOf(entity.get("nmMenu")));
-		tvvnMenu.setIdMenuSup(String.valueOf(entity.get("idMenuSup")));
-		tvvnMenu.setTipoMenu(String.valueOf(entity.get("tipoMenu")));
-		tvvnMenu.setHref(String.valueOf(entity.get("href")));
-		tvvnMenu.setNivel(String.valueOf(entity.get("nivel")));
-		tvvnMenu.setOrden(String.valueOf(entity.get("orden")));
-		tvvnMenu.setIndVisible(String.valueOf(entity.get("indVisible")));
-		tvvnMenu.setIdEstado(String.valueOf(entity.get("idEstado")));
-		return tvvnMenuRepository.save(tvvnMenu);
+		TevnMenu.setIdMenu(String.valueOf(entity.get("idMenu")));
+		TevnMenu.setNmMenu(String.valueOf(entity.get("nmMenu")));
+		TevnMenu.setIdMenuSup(String.valueOf(entity.get("idMenuSup")));
+		TevnMenu.setTipoMenu(String.valueOf(entity.get("tipoMenu")));
+		TevnMenu.setHref(String.valueOf(entity.get("href")));
+		TevnMenu.setNivel(String.valueOf(entity.get("nivel")));
+		TevnMenu.setOrden(String.valueOf(entity.get("orden")));
+		TevnMenu.setIndVisible(String.valueOf(entity.get("indVisible")));
+		TevnMenu.setIdEstado(String.valueOf(entity.get("idEstado")));
+		return TevnMenuRepository.save(TevnMenu);
 	}
 
 	@Override
-	public Mono<TvvnMenu> findById(String id) {
-		return tvvnMenuRepository.findById(id);
+	public Mono<TevnMenu> findById(String id) {
+		return TevnMenuRepository.findById(id);
 	}
 
 	@Override
-	public Flux<TvvnMenu> findAll() {
-		return tvvnMenuRepository.findAll().sort((tvvnMenu1, tvvnMenu2) -> {
-			return tvvnMenu1.getOrden().compareTo(tvvnMenu2.getOrden());
+	public Flux<TevnMenu> findAll() {
+		return TevnMenuRepository.findAll().sort((TevnMenu1, TevnMenu2) -> {
+			return TevnMenu1.getOrden().compareTo(TevnMenu2.getOrden());
 		});
 	}
 
 	@Override
 	public Mono<Void> remove(String id) {
-		TvvnMenu tvvnMenuMono = tvvnMenuRepository.findById(id).block();
-		return tvvnMenuRepository.delete(tvvnMenuMono);
+		TevnMenu TevnMenuMono = TevnMenuRepository.findById(id).block();
+		return TevnMenuRepository.delete(TevnMenuMono);
 	}
 
 	@Override
-	public Flux<TvvnMenu> createVarious(List<Map<String, Object>> tvvnMenuList) {
+	public Flux<TevnMenu> createVarious(List<Map<String, Object>> TevnMenuList) {
 		
-		if(Objects.isNull(tvvnMenuList)) {
+		if(Objects.isNull(TevnMenuList)) {
 			return null;
 		}
 		
-		Iterable<TvvnMenu> tvvnMenuIterable = tvvnMenuList.stream()
-				.map(tvvnMenuMap -> {
-					TvvnMenu tvvnMenu = new TvvnMenu();
-					tvvnMenu.setIdMenu(String.valueOf(tvvnMenuMap.get("idMenu")));
-					tvvnMenu.setNmMenu(String.valueOf(tvvnMenuMap.get("nmMenu")));
-					tvvnMenu.setIdMenuSup(String.valueOf(tvvnMenuMap.get("idMenuSup")));
-					tvvnMenu.setTipoMenu(String.valueOf(tvvnMenuMap.get("tipoMenu")));
-					tvvnMenu.setHref(String.valueOf(tvvnMenuMap.get("href")));
-					tvvnMenu.setNivel(String.valueOf(tvvnMenuMap.get("nivel")));
-					tvvnMenu.setOrden(String.valueOf(tvvnMenuMap.get("orden")));
-					tvvnMenu.setIndVisible(String.valueOf(tvvnMenuMap.get("indVisible")));
-					tvvnMenu.setIdEstado(String.valueOf(tvvnMenuMap.get("idEstado")));
-					return tvvnMenu;
+		Iterable<TevnMenu> TevnMenuIterable = TevnMenuList.stream()
+				.map(TevnMenuMap -> {
+					TevnMenu TevnMenu = new TevnMenu();
+					TevnMenu.setIdMenu(String.valueOf(TevnMenuMap.get("idMenu")));
+					TevnMenu.setNmMenu(String.valueOf(TevnMenuMap.get("nmMenu")));
+					TevnMenu.setIdMenuSup(String.valueOf(TevnMenuMap.get("idMenuSup")));
+					TevnMenu.setTipoMenu(String.valueOf(TevnMenuMap.get("tipoMenu")));
+					TevnMenu.setHref(String.valueOf(TevnMenuMap.get("href")));
+					TevnMenu.setNivel(String.valueOf(TevnMenuMap.get("nivel")));
+					TevnMenu.setOrden(String.valueOf(TevnMenuMap.get("orden")));
+					TevnMenu.setIndVisible(String.valueOf(TevnMenuMap.get("indVisible")));
+					TevnMenu.setIdEstado(String.valueOf(TevnMenuMap.get("idEstado")));
+					return TevnMenu;
 				})
 				.collect(Collectors.toList());
 		
-		return tvvnMenuRepository.saveAll(tvvnMenuIterable);
+		return TevnMenuRepository.saveAll(TevnMenuIterable);
 	}
 
 	@Override
 	public Flux<TreeSet<Map<String, Object>>> menuTree() {
-		Flux<TvvnMenu> tvvnMenuFlux =  tvvnMenuRepository.findAllVisible(ViConstant.IND_VISIBLE_S).sort((tvvnMenu1, tvvnMenu2) -> {
-			return tvvnMenu1.getOrden().compareTo(tvvnMenu2.getOrden());
+		Flux<TevnMenu> TevnMenuFlux =  TevnMenuRepository.findAllVisible(Constant.IND_VISIBLE_S).sort((TevnMenu1, TevnMenu2) -> {
+			return TevnMenu1.getOrden().compareTo(TevnMenu2.getOrden());
 		});
-		List<TvvnMenu> tvvnMenuList = tvvnMenuFlux.collectList().block();
+		List<TevnMenu> TevnMenuList = TevnMenuFlux.collectList().block();
 		TreeSet<Map<String, Object>> menu = new TreeSet<>(new IntComparator("orden"));
-		for(TvvnMenu tvvnMenu : tvvnMenuList) {
+		for(TevnMenu TevnMenu : TevnMenuList) {
 			Map<String, Object> menuPadre = new HashMap<>();
 			
-			//if(tvvnMenu.getIndVisible().equals(ViConstant.IND_VISIBLE_N)) continue;
+			//if(TevnMenu.getIndVisible().equals(ViConstant.IND_VISIBLE_N)) continue;
 			
-			if(tvvnMenu.getIdMenu().equals(tvvnMenu.getIdMenuSup())) {
-				menuPadre.put("id", tvvnMenu.getIdMenu());
-				menuPadre.put("name", tvvnMenu.getNmMenu());
-				menuPadre.put("sup", tvvnMenu.getIdMenuSup());
-				menuPadre.put("tipo", tvvnMenu.getTipoMenu());
-				menuPadre.put("href", tvvnMenu.getHref());
-				menuPadre.put("nivel",  Integer.valueOf(tvvnMenu.getNivel()));
-				menuPadre.put("orden", tvvnMenu.getOrden());
-				menuPadre.put("visible", tvvnMenu.getIndVisible());
-				menuPadre.put("estado", tvvnMenu.getIdEstado());
+			if(TevnMenu.getIdMenu().equals(TevnMenu.getIdMenuSup())) {
+				menuPadre.put("id", TevnMenu.getIdMenu());
+				menuPadre.put("name", TevnMenu.getNmMenu());
+				menuPadre.put("sup", TevnMenu.getIdMenuSup());
+				menuPadre.put("tipo", TevnMenu.getTipoMenu());
+				menuPadre.put("href", TevnMenu.getHref());
+				menuPadre.put("nivel",  Integer.valueOf(TevnMenu.getNivel()));
+				menuPadre.put("orden", TevnMenu.getOrden());
+				menuPadre.put("visible", TevnMenu.getIndVisible());
+				menuPadre.put("estado", TevnMenu.getIdEstado());
 				
-				List<TvvnMenu> tvvnMenuSubList = tvvnMenuList
+				List<TevnMenu> TevnMenuSubList = TevnMenuList
 						.stream()
-						.filter(tm -> tm.getIdMenuSup().equals(tvvnMenu.getIdMenu()))
+						.filter(tm -> tm.getIdMenuSup().equals(TevnMenu.getIdMenu()))
 						.collect(Collectors.toList());
-				if(tvvnMenuSubList.size() > 0) {
-					menuPadre.put("children", buscarHijosMenu(tvvnMenu, tvvnMenuSubList, tvvnMenuList));
+				if(TevnMenuSubList.size() > 0) {
+					menuPadre.put("children", buscarHijosMenu(TevnMenu, TevnMenuSubList, TevnMenuList));
 				}else {
 					menuPadre.put("children", "");
 				}
@@ -133,30 +134,30 @@ public class TevnMenuServiceImp implements TevnMenuService {
 		return Flux.just(menu);
 	}
 	
-	public TreeSet<Map<String, Object>> buscarHijosMenu(TvvnMenu tvvnMenu, List<TvvnMenu> tvvnMenuHijos, List<TvvnMenu> tvvnMenuList){
+	public TreeSet<Map<String, Object>> buscarHijosMenu(TevnMenu TevnMenu, List<TevnMenu> TevnMenuHijos, List<TevnMenu> TevnMenuList){
 		TreeSet<Map<String, Object>> hijoTree = new TreeSet<>(new IntComparator("orden"));
 		
-		for(TvvnMenu tvvnMenuHijo : tvvnMenuHijos) {
+		for(TevnMenu TevnMenuHijo : TevnMenuHijos) {
 			
-			if(tvvnMenuHijo.getIdMenu().equals(tvvnMenu.getIdMenuSup())) continue;
+			if(TevnMenuHijo.getIdMenu().equals(TevnMenu.getIdMenuSup())) continue;
 			
 			Map<String, Object> menuHijo = new HashMap<>();
-			menuHijo.put("id", tvvnMenuHijo.getIdMenu());
-			menuHijo.put("name", tvvnMenuHijo.getNmMenu());
-			menuHijo.put("sup", tvvnMenuHijo.getIdMenuSup());
-			menuHijo.put("tipo", tvvnMenuHijo.getTipoMenu());
-			menuHijo.put("href", tvvnMenuHijo.getHref());
-			menuHijo.put("nivel", Integer.valueOf(tvvnMenuHijo.getNivel()));
-			menuHijo.put("orden", tvvnMenuHijo.getOrden());
-			menuHijo.put("visible", tvvnMenuHijo.getIndVisible());
-			menuHijo.put("estado", tvvnMenuHijo.getIdEstado());
+			menuHijo.put("id", TevnMenuHijo.getIdMenu());
+			menuHijo.put("name", TevnMenuHijo.getNmMenu());
+			menuHijo.put("sup", TevnMenuHijo.getIdMenuSup());
+			menuHijo.put("tipo", TevnMenuHijo.getTipoMenu());
+			menuHijo.put("href", TevnMenuHijo.getHref());
+			menuHijo.put("nivel", Integer.valueOf(TevnMenuHijo.getNivel()));
+			menuHijo.put("orden", TevnMenuHijo.getOrden());
+			menuHijo.put("visible", TevnMenuHijo.getIndVisible());
+			menuHijo.put("estado", TevnMenuHijo.getIdEstado());
 			
-			List<TvvnMenu> tvvnMenuSubList = tvvnMenuList
+			List<TevnMenu> TevnMenuSubList = TevnMenuList
 					.stream()
-					.filter(tm -> tm.getIdMenuSup().equals(tvvnMenuHijo.getIdMenu()))
+					.filter(tm -> tm.getIdMenuSup().equals(TevnMenuHijo.getIdMenu()))
 					.collect(Collectors.toList());
-			if(tvvnMenuSubList.size() > 0) {
-				menuHijo.put("children", buscarHijosMenu(tvvnMenu, tvvnMenuSubList, tvvnMenuList));
+			if(TevnMenuSubList.size() > 0) {
+				menuHijo.put("children", buscarHijosMenu(TevnMenu, TevnMenuSubList, TevnMenuList));
 			}else {
 				menuHijo.put("children", "");
 			}
@@ -171,21 +172,21 @@ public class TevnMenuServiceImp implements TevnMenuService {
 	public Flux<TreeSet<Map<String, Object>>> findIfContains(Map<String, String> filter) {
 		TreeSet<Map<String, Object>> menuTree = new TreeSet<>(new IntComparator("orden"));
 		
-		List<TvvnMenu> tvvnMenuList = tvvnMenuRepository.findObjectIfContains(filter).collectList().block();
-		menuTree = UtilConverter.getTree(TvvnMenu.class, tvvnMenuList, "orden", "idMenu", "idMenuSup");
+		List<TevnMenu> TevnMenuList = TevnMenuRepository.findObjectIfContains(filter).collectList().block();
+		menuTree = UtilConverter.getTree(TevnMenu.class, TevnMenuList, "orden", "idMenu", "idMenuSup");
 		
 		return Flux.just(menuTree);
 	}
 
 	@Override
-	public Mono<TvvnMenu> toggle(Map<String, Object> entity) {
-		TvvnMenu tvvnMenu = null;
-		tvvnMenu = tvvnMenuRepository.findByIdMenu(String.valueOf(entity.get("idMenu"))).block();
-		if(Objects.isNull(tvvnMenu)) {
-			throw new ViValidationException(HttpStatus.NOT_FOUND, "No fue posible encontrar el menú");
+	public Mono<TevnMenu> toggle(Map<String, Object> entity) {
+		TevnMenu TevnMenu = null;
+		TevnMenu = TevnMenuRepository.findByIdMenu(String.valueOf(entity.get("idMenu"))).block();
+		if(Objects.isNull(TevnMenu)) {
+			throw new ValidationException(HttpStatus.NOT_FOUND, "No fue posible encontrar el menú");
 		}
-		tvvnMenu.setIdEstado(String.valueOf(entity.get("idEstado")));
-		return tvvnMenuRepository.save(tvvnMenu);
+		TevnMenu.setIdEstado(String.valueOf(entity.get("idEstado")));
+		return TevnMenuRepository.save(TevnMenu);
 	}
 	
 }
