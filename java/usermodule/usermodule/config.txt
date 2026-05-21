@@ -1,0 +1,30 @@
+logging:
+  level: INFO
+  loggers:
+    com.enviexpres.logistica.usermodule: DEBUG
+
+server:
+  type: simple
+  applicationContextPath: /api
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 8081
+
+swagger:
+  resourcePackage: com.enviexpres.logistica.usermodule
+  title: Administration Services API
+  description: Access to Administration Services
+  version: 2.2.16
+
+version: '3.7'
+services:
+  mongodb_container:
+   image: mongo:latest
+  ports:
+   - 27017:27017
+  volumes:
+  - mongodb_data_container:/data/db
+
+volumes:
+  mongodb_data_container 
