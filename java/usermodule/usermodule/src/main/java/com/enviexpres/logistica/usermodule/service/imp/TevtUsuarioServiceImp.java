@@ -37,7 +37,7 @@ public class TevtUsuarioServiceImp implements TevtUsuarioService {
 		TevtUsuario tevtUsuario = new TevtUsuario();
 		
 		if (StringUtils.isEmpty(entity.get("nus"))) {
-			String lastId = tevtUsuarioRepository.findTopByOrderByIdUsuarioDesc().block().getNus();
+			String lastId = tevtUsuarioRepository.findTopByOrderByNusDesc().block().getNus();
 			tevtUsuario.setNus(UtilsGeneral.devolverConsecutivo12Digitos(lastId));
 		} else {
 			tevtUsuario = tevtUsuarioRepository.findByNus(entity.get("idUsuario")).block();

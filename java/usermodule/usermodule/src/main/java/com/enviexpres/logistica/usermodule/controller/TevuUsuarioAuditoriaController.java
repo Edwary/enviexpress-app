@@ -16,7 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class TevtUsuarioAuditoriaController {
+public class TevuUsuarioAuditoriaController {
 
 	@Autowired
 	private TevuUsuarioAuditoriaService tevuUsuarioAuditoriaService;

@@ -1,4 +1,4 @@
-package com.enviexpres.logistica.clientmodule.model.dto;
+package com.enviexpres.logistica.packmodule.model.dto;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

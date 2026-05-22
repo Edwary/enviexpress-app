@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface TevtUsuarioRepository extends ReactiveMongoRepository<TevtUsuario, String>{
 
-	Mono<TevtUsuario> findTopByOrderByIdUsuarioDesc();
+	Mono<TevtUsuario> findTopByOrderByNusDesc();
 
 	@Query("{ 'nus' : ?0 }")
 	Mono<TevtUsuario> findByNus(String nus);

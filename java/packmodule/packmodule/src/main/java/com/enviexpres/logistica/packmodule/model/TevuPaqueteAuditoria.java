@@ -1,12 +1,12 @@
-package com.enviexpres.logistica.usermodule.model;
+package com.enviexpres.logistica.packmodule.model;
 
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document( collection =  "tevu_usuario_auditoria")
-public class TevuUsuarioAuditoria {
+@Document(collection="tevu_paquete_auditoria")
+public class TevuPaqueteAuditoria {
 
 	@Id
 	private String consecutivo;
@@ -19,9 +19,9 @@ public class TevuUsuarioAuditoria {
 	private String accion;
 	private org.bson.Document contenido;
 	
-	public TevuUsuarioAuditoria() {}
+	public TevuPaqueteAuditoria() {}
 
-	public TevuUsuarioAuditoria(String consecutivo, String vista, String usuario, String nup, String nus, Date fecha,
+	public TevuPaqueteAuditoria(String consecutivo, String vista, String usuario, String nup, String nus, Date fecha,
 			String hora, String accion, org.bson.Document contenido) {
 		super();
 		this.consecutivo = consecutivo;
