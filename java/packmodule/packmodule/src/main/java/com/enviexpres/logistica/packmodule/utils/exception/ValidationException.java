@@ -36,7 +36,6 @@ public class ValidationException extends ResponseStatusException {
 	
     @Override
     public String getMessage() {
-        // Devuelve el mensaje personalizado que deseas incluir en la respuesta
         return "Mensaje personalizado: " + super.getMessage();
     }
 }
