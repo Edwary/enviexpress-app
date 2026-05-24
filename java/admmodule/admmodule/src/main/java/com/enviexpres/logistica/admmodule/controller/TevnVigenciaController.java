@@ -24,48 +24,32 @@ import reactor.core.publisher.Mono;
 @RestController
 public class TevnVigenciaController {
 
-	@Autowired
-	private TevnVigenciaService tevnVigenciaService;
-	
-	@PostMapping("/vigencia/create")
-	public Mono<ResponseEntity<Map<String, Object>>> createUpdate(@Valid @RequestBody Map<String, Object> entity) {
-		return tevnVigenciaService.create(entity)
-				.flatMap(tevnVigencia -> {
-					if (Objects.isNull(tevnVigencia)) {
-						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.CONFLICT, null), HttpStatus.CONFLICT));
-					} else {
-						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.CREATED, tevnVigencia), HttpStatus.CREATED));
-					}
-				});
-	}
-	
-	@GetMapping("/vigencia/{idVigencia}")
-	public Mono<ResponseEntity<Map<String, Object>>> findById(@PathVariable("idVigencia") String idVigencia) {
-		return tevnVigenciaService.findById(idVigencia)
-				.flatMap(tevnVigencia -> {
-					if (Objects.isNull(tevnVigencia)) {
-						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), HttpStatus.NOT_FOUND));
-					} else {
-						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.OK, tevnVigencia), HttpStatus.OK));
-					}
-				});
-	}
-	
-	@GetMapping("/vigencia/all")
-	public Flux<TevnVigencia> findAllVigencia() {
-		return tevnVigenciaService.findAll();
-	}
-	
-	@PutMapping("/vigencia/toggle")
-	public Mono<ResponseEntity<Map<String, Object>>> toggle(@Valid @RequestBody Map<String, Object> entity) {
-		return tevnVigenciaService.toggle(entity)
-				.flatMap(tevnVigencia -> {
-					if (Objects.isNull(tevnVigencia)) {
-						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.CONFLICT, null), HttpStatus.CONFLICT));
-					} else {
-						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.OK, tevnVigencia), HttpStatus.OK));
-					}
-				});
-	}
-	
+    @Autowired
+    private TevnVigenciaService tevnVigenciaService;
+
+    @PostMapping("/vigencia/create")
+    public Mono<ResponseEntity<Map<String, Object>>> createUpdate(@Valid @RequestBody Map<String, Object> entity) {
+        return tevnVigenciaService.create(entity)
+            .map(vig -> ResponseEntity.status(HttpStatus.CREATED).body(UtilConverter.apiResponse(HttpStatus.CREATED, vig)))
+            .defaultIfEmpty(ResponseEntity.status(HttpStatus.CONFLICT).body(UtilConverter.apiResponse(HttpStatus.CONFLICT, null)));
+    }
+
+    @GetMapping("/vigencia/{idVigencia}")
+    public Mono<ResponseEntity<Map<String, Object>>> findById(@PathVariable("idVigencia") String idVigencia) {
+        return tevnVigenciaService.findById(idVigencia)
+            .map(vig -> ResponseEntity.ok(UtilConverter.apiResponse(HttpStatus.OK, vig)))
+            .defaultIfEmpty(ResponseEntity.status(HttpStatus.NOT_FOUND).body(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null)));
+    }
+
+    @GetMapping("/vigencia/all")
+    public Flux<TevnVigencia> findAllVigencia() {
+        return tevnVigenciaService.findAll();
+    }
+
+    @PutMapping("/vigencia/toggle")
+    public Mono<ResponseEntity<Map<String, Object>>> toggle(@Valid @RequestBody Map<String, Object> entity) {
+        return tevnVigenciaService.toggle(entity)
+            .map(vig -> ResponseEntity.ok(UtilConverter.apiResponse(HttpStatus.OK, vig)))
+            .defaultIfEmpty(ResponseEntity.status(HttpStatus.CONFLICT).body(UtilConverter.apiResponse(HttpStatus.CONFLICT, null)));
+    }
 }

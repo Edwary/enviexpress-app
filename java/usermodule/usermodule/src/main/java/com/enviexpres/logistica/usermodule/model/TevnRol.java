@@ -10,15 +10,17 @@ public class TevnRol {
 	private String uuid;
 	private String idRol;
 	private String nombre;
+	private String sbRol;
 	private String idEstado;
 	
 	public TevnRol() {}
 	
-	public TevnRol(String uuid, String idRol, String nombre, String idEstado) {
+	public TevnRol(String uuid, String idRol, String nombre, String sbRol, String idEstado) {
 		super();
 		this.uuid = uuid;
 		this.idRol = idRol;
 		this.nombre = nombre;
+		this.sbRol = sbRol;
 		this.idEstado = idEstado;
 	}
 
@@ -44,6 +46,14 @@ public class TevnRol {
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
+	}
+
+	public String getSbRol() {
+		return sbRol;
+	}
+
+	public void setSbRol(String sbRol) {
+		this.sbRol = sbRol;
 	}
 
 	public String getIdEstado() {

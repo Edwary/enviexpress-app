@@ -1,0 +1,14 @@
+{
+  "url": {
+    "adm": "https://tu-api.com/api/v1/"
+  },
+  "info_messages": {
+    "adm": {
+      "ubicaciones": {
+        "creacion_no_encontrada": "No se encontró el elemento para editar.",
+        "inactivar_ubicacion": "¿Estás seguro de inactivar esta ubicación?",
+        "eliminar_ubicacion": "¿Estás seguro de eliminar esta ubicación de forma permanente?"
+      }
+    }
+  }
+}

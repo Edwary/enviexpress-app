@@ -25,17 +25,25 @@ public class TevnRolServiceImp implements TevnRolService {
 	
 	@Override
 	public Mono<TevnRol> create(Map<String, String> entity) {
-		TevnRol tevnRol = new TevnRol();
-		
-		if (StringUtils.isEmpty(entity.get("idRol"))) {
-			String lastId = tevnRolRepository.findTopByOrderByIdRolDesc().block().getIdRol();
-			tevnRol.setIdRol(UtilsGeneral.devolverConsecutivo4Digitos(lastId));
-		} else {
-			tevnRol = tevnRolRepository.findByIdRol(entity.get("idRol")).block();
-		}
-		tevnRol.setNombre(entity.get("nombre"));
-		tevnRol.setIdEstado(StringUtils.isEmpty(entity.get("idEstado")) ? Constant.IND_ESTADO_ACTIVO : entity.get("idEstado"));
-		return tevnRolRepository.save(tevnRol);
+	    String idRol = entity.get("idRol");
+
+	    Mono<TevnRol> sourceMono = StringUtils.isEmpty(idRol) 
+	        ? tevnRolRepository.findTopByOrderByIdRolDesc()
+	            .map(last -> {
+	                TevnRol nuevo = new TevnRol();
+	                nuevo.setIdRol(UtilsGeneral.devolverConsecutivo4Digitos(last.getIdRol()));
+	                return nuevo;
+	            })
+	            .defaultIfEmpty(new TevnRol() {{ setIdRol(UtilsGeneral.devolverConsecutivo4Digitos("0")); }})
+	        : tevnRolRepository.findByIdRol(idRol)
+	            .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Rol no encontrado")));
+
+	    return sourceMono.map(rol -> {
+	        rol.setNombre(entity.get("nombre"));
+	        rol.setSbRol(entity.get("sbRol"));
+	        rol.setIdEstado(StringUtils.isEmpty(entity.get("idEstado")) ? Constant.IND_ESTADO_ACTIVO : entity.get("idEstado"));
+	        return rol;
+	    }).flatMap(tevnRolRepository::save);
 	}
 
 	@Override
@@ -50,21 +58,19 @@ public class TevnRolServiceImp implements TevnRolService {
 	
 	@Override
 	public Mono<TevnRol> toggle(Map<String, String> entity) {
-		TevnRol tevnRol = tevnRolRepository.findByIdRol(entity.get("idRol")).block();
-		if (tevnRol == null) {
-			throw new ValidationException(HttpStatus.NOT_FOUND, "Rol no encontrado");
-		}
-		tevnRol.setIdEstado(entity.get("idEstado"));
-		return tevnRolRepository.save(tevnRol);
+	    return tevnRolRepository.findByIdRol(entity.get("idRol"))
+	        .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Rol no encontrado")))
+	        .flatMap(tevnRol -> {
+	            tevnRol.setIdEstado(entity.get("idEstado"));
+	            return tevnRolRepository.save(tevnRol);
+	        });
 	}
 
 	@Override
 	public Mono<Void> remove(String idRol) {
-		TevnRol tevnRol = tevnRolRepository.findByIdRol(idRol).block();
-		if (tevnRol == null) {
-			throw new ValidationException(HttpStatus.NOT_FOUND, "Rol no encontrado");
-		}
-		return tevnRolRepository.delete(tevnRol);
+	    return tevnRolRepository.findByIdRol(idRol)
+	        .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Rol no encontrado")))
+	        .flatMap(tevnRol -> tevnRolRepository.delete(tevnRol));
 	}
 
 	

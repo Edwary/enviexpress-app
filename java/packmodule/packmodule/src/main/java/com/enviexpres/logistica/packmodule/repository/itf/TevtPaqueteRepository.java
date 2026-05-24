@@ -82,4 +82,6 @@ public interface TevtPaqueteRepository extends ReactiveMongoRepository<TevtPaque
 	    + "} }"
 	})
 	Flux<Document> findIfContains(Map<String, String> where, Date fechaInicio, Date fechaFin);
+	
+	Mono<Long> countByIdEstado(String idEstado);
 }

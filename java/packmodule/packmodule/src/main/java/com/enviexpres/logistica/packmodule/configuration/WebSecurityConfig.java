@@ -1,21 +1,19 @@
 package com.enviexpres.logistica.packmodule.configuration;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.reactive.config.CorsRegistry;
+import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration
-@EnableWebMvc
-public class WebSecurityConfig implements WebMvcConfigurer {
+@EnableWebFlux
+public class WebSecurityConfig implements WebFluxConfigurer {
 	
 	@Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-		        //.allowedOrigins("http://localhost:4200") // Origen de Angular permitido
 		        .allowedOrigins("http://localhost:4200")
-		        .allowedMethods("*") // Permite todos los métodos (GET, POST, PUT, DELETE, etc.)
-		        .allowedHeaders("*"); // Permite todas las cabeceras
+		        .allowedMethods("*")
+		        .allowedHeaders("*");
     }
-	
 }

@@ -25,11 +25,11 @@ import reactor.core.publisher.Mono;
 public class TevnRolController {
 
 	@Autowired
-	private TevnRolService TevnRolService;
+	private TevnRolService tevnRolService;
 	
 	@PostMapping("/rol/create")
-	public Mono<ResponseEntity<Map<String, Object>>> createUpdateRol(@Valid @RequestBody Map<String, String> entity) {
-		return TevnRolService.create(entity)
+	public Mono<ResponseEntity<Map<String, Object>>> createUpdateRol(@RequestBody Map<String, String> entity) {
+		return tevnRolService.create(entity)
 				.flatMap(tevnRol -> {
 					if(Objects.isNull(tevnRol)) {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.CONFLICT, null), HttpStatus.CONFLICT));
@@ -41,7 +41,7 @@ public class TevnRolController {
 	
 	@GetMapping("/rol/findById/{idRol}")
 	public Mono<ResponseEntity<Map<String, Object>>> findById(@PathVariable(value="idRol") String idRol) {
-		return TevnRolService.findById(idRol)
+		return tevnRolService.findById(idRol)
 				.flatMap(tevnRol -> {
 					if(Objects.isNull(tevnRol)) {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), HttpStatus.NOT_FOUND));
@@ -53,12 +53,12 @@ public class TevnRolController {
 	
 	@GetMapping("/rol/findAll")
 	public Flux<TevnRol> findAllRol() {
-		return TevnRolService.findAll();
+		return tevnRolService.findAll();
 	}
 	
 	@PutMapping("/rol/toggle")
 	public Mono<ResponseEntity<Map<String, Object>>> toggleRol(@Valid @RequestBody Map<String, String> entity) {
-		return TevnRolService.toggle(entity)
+		return tevnRolService.toggle(entity)
 				.flatMap(tevnRol -> {
 					if(Objects.isNull(tevnRol)) {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), HttpStatus.NOT_FOUND));

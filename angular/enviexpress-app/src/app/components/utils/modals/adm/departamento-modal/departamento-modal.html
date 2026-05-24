@@ -1,0 +1,162 @@
+<div class="m-8 p-4">
+  <div class="flex items-center mb-4">
+    @if (createUpdateDepto) { <h2 class="text-xl font-bold">Crear/Editar Departamento</h2> }
+    @if (buscarDepto) { <h2 class="text-xl font-bold">Buscar Departamento</h2> }
+    @if (toggleDepto) { <h2 class="text-xl font-bold">Inactivar/Activar Ubicación</h2> }
+    @if (deleteDepto) { <h2 class="text-xl font-bold">Eliminar Ubicación</h2> }
+  </div>
+
+  @if (createUpdateDepto) {
+  <form [formGroup]="createUpdateDeptoForm" (ngSubmit)="submitCreateUpdateDepto()">
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center">
+        <label class="w-[120px] font-bold">Identificador: </label>
+        <div class="flex-1">
+          <mat-form-field class="w-full sm:w-[500px]">
+            <input matInput formControlName="idDepto" [value]="idDepto" placeholder="Identificador">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex items-center">
+        <label class="w-[120px] font-bold">Nombre Depto: </label>
+        <div class="flex-1">
+          <mat-form-field class="w-full sm:w-[500px]">
+            <input matInput formControlName="nmDepto" [value]="nmDepto" placeholder="Nombre Departamento">
+            @if (createUpdateDeptoForm.controls['nmDepto'].invalid && createUpdateDeptoForm.controls['nmDepto'].touched) {
+              <mat-error>El nombre del departamento es obligatorio.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label class="w-[120px] font-bold">Abreviatura: </label>
+          <mat-form-field class="w-[200px]">
+            <input matInput formControlName="sbDepto" [value]="sbDepto" placeholder="Abrev Depto">
+            @if (createUpdateDeptoForm.controls['sbDepto'].invalid && createUpdateDeptoForm.controls['sbDepto'].touched) {
+              <mat-error>La abreviatura es obligatoria.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="font-bold">Region: </label>
+          <mat-form-field class="w-[200px]">
+            <input matInput formControlName="region" [value]="region" placeholder="Región">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label class="w-[120px] font-bold">Código Dane: </label>
+          <mat-form-field class="w-[200px]">
+            <input matInput formControlName="codigoDane" [value]="codigoDane" placeholder="Código Dane">
+          </mat-form-field>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="font-bold">Código Postal: </label>
+          <mat-form-field class="w-[200px]">
+            <input matInput formControlName="codigoPostal" [value]="codigoPostal" placeholder="Código Postal">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label class="w-[120px] font-bold">País: </label>
+          <mat-form-field class="w-[200px]">
+            <input matInput (click)="paisModal()" class="cursor-pointer" placeholder="Seleccione un país..." formControlName="idPais" readonly>
+            @if (createUpdateDeptoForm.controls['idPais'].invalid && createUpdateDeptoForm.controls['idPais'].touched) {
+              <mat-error>Se requiere seleccionar un país.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="font-bold">Estado: </label>
+          <mat-form-field class="w-[200px]">
+            <mat-select formControlName="idEstado" [(value)]="idEstado">
+              @for (option of estadoOptions; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </form>
+  }
+
+  @if (buscarDepto) {
+  <div class="w-full h-full mt-4">
+    <div class="flex items-center gap-4 mb-4">
+      <span class="font-bold">Filtrar por:</span>
+      <mat-form-field class="w-48">
+        <mat-label>Departamento</mat-label>
+        <input matInput [(ngModel)]="nmDepto" placeholder="Nombre Depto">
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="filtrarDatos()">Filtrar</button>
+    </div>
+
+    <mat-paginator class="block overflow-hidden w-3/4 mb-4" #paginator [pageSizeOptions]="[5, 7, 10]" showFirstLastButtons></mat-paginator>
+    
+    <div class="flex overflow-auto w-full max-h-[400px]">
+      <mat-table [dataSource]="dataSource" matSort class="w-full mat-elevation-z8">
+        <ng-container matColumnDef="Seleccione">
+          <th mat-header-cell *matHeaderCellDef class="w-[10%] text-center">Seleccione</th>
+          <td mat-cell *matCellDef="let row" class="w-[10%] text-center">
+            <mat-radio-group [(ngModel)]="selectedRow">
+              <mat-radio-button [value]="row"></mat-radio-button>
+            </mat-radio-group>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="Nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="w-[60%]">Nombre</th>
+          <td mat-cell *matCellDef="let element" class="whitespace-normal break-words">{{element.nmDepartamento}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="Estado">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="w-[20%] text-center">Estado</th>
+          <td mat-cell *matCellDef="let element" class="text-center">
+            <div class="w-5 h-5 rounded-full inline-block" [ngClass]="{'bg-[#33CA7F]': element.idEstado === '0001', 'bg-[#F15152]': element.idEstado === '0002'}"></div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas" class="hover:bg-gray-50"></tr>
+      </mat-table>
+    </div>
+  </div>
+  }
+
+  @if (toggleDepto) {
+  <form [formGroup]="toggleDeptoForm" (ngSubmit)="submitToggleDepto()">
+    <div class="my-6 text-lg font-medium text-center">
+      <label>{{message}}</label>
+    </div>
+  </form>
+  }
+
+  @if (deleteDepto) {
+  <form [formGroup]="deleteDeptoForm" (ngSubmit)="submitDeleteDepto()">
+    <div class="my-6 text-lg font-medium text-center text-red-600">
+      <label>{{message}}</label>
+    </div>
+  </form>
+  }
+
+  <div class="flex justify-end gap-4 mt-8">
+    <button mat-button class="bg-[#4392F1] text-white hover:bg-blue-600" (click)="
+        createUpdateDepto ? submitCreateUpdateDepto() : 
+        buscarDepto ? submitBuscarDepto() : 
+        toggleDepto ? submitToggleDepto() : 
+        submitDeleteDepto()">
+      Aceptar
+    </button>
+    <button mat-button (click)="closeDialog()" class="bg-[#F7F7FF] text-[#000022] border border-[#000022]">
+      Cerrar
+    </button>
+  </div>
+</div>

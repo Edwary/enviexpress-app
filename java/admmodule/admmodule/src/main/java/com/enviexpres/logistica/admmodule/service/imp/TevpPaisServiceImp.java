@@ -54,8 +54,8 @@ public class TevpPaisServiceImp implements TevpPaisService {
 
 	@Override
 	public Flux<TevpPais> findAll() {
-		List<TevpPais> tevpPaisList = tevpPaisRepository.findAll().toStream().filter(p -> !p.getIdEstado().equals(Constant.IND_ESTADO_ELIMINADO)).collect(Collectors.toList());
-		return Flux.fromIterable(tevpPaisList);
+	    return tevpPaisRepository.findAll()
+	        .filter(p -> !Constant.IND_ESTADO_ELIMINADO.equals(p.getIdEstado()));
 	}
 
 	@Override
@@ -128,13 +128,10 @@ public class TevpPaisServiceImp implements TevpPaisService {
 	
 	@Override
 	public Mono<TevpPais> togglePais(String id) {
-		TevpPais tevpPais = tevpPaisRepository.findById(id).block();
-		if(tevpPais.getIdEstado().equals(Constant.IND_ESTADO_ACTIVO)) {
-			tevpPais.setIdEstado(Constant.IND_ESTADO_INACTIVO);
-		} else {
-			tevpPais.setIdEstado(Constant.IND_ESTADO_ACTIVO);
-		}
-		return tevpPaisRepository.save(tevpPais);
+	    return tevpPaisRepository.findById(id).map(p -> {
+	        p.setIdEstado(p.getIdEstado().equals(Constant.IND_ESTADO_ACTIVO) ? Constant.IND_ESTADO_INACTIVO : Constant.IND_ESTADO_ACTIVO);
+	        return p;
+	    }).flatMap(tevpPaisRepository::save);
 	}
 	
 	@Override

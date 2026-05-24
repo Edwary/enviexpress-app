@@ -33,31 +33,23 @@ public class TevuAdminAuditoriaServiceImp implements TevuAdminAuditoriaService {
 	
 	@Override
 	public Mono<TevuAdminAuditoria> create(Map<String, Object> entity) {
-		TevuAdminAuditoria tevuAdminAuditoria = new TevuAdminAuditoria();
-		
-		Flux<TevuAdminAuditoria> tevuAdminAuditoriaFlux = tevuAdminAuditoriaRepository.findAll();
-		Date date = UtilConverter.currentDateComplete();
-		try {
-			if(tevuAdminAuditoriaFlux.count().block() > 0L) {
-				tevuAdminAuditoria.setConsecutivo(UtilsGeneral.devolverConsecutivo12Digitos(tevuAdminAuditoriaFlux.last().block().getConsecutivo()));
-			} else {
-				tevuAdminAuditoria.setConsecutivo(UtilsGeneral.devolverConsecutivo12Digitos(""));
-			}
-			tevuAdminAuditoria.setVista(String.valueOf(entity.get("vista")));
-			tevuAdminAuditoria.setUsuario(String.valueOf(entity.get("usuario")));
-			tevuAdminAuditoria.setNup(String.valueOf(entity.get("nup")));
-			tevuAdminAuditoria.setNus(String.valueOf(entity.get("nus")));
-			tevuAdminAuditoria.setFecha(date);
-			tevuAdminAuditoria.setHora(UtilConverter.getHora(date));
-			tevuAdminAuditoria.setAccion(String.valueOf(entity.get("accion")));
-			tevuAdminAuditoria.setContenido(UtilConverter.classToDocument(entity.get("contenido")));
-		} catch (RuntimeException e) {
-			TevnError tevnError = UtilConverter.createError(e, MODULO);
-			tevnErrorRepository.save(tevnError);
-			throw new ValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.InformacionUsuario");
-		}
-		
-		return tevuAdminAuditoriaRepository.save(tevuAdminAuditoria);
+	    return tevuAdminAuditoriaRepository.findAll()
+	        .reduce((first, last) -> last)
+	        .map(last -> UtilsGeneral.devolverConsecutivo12Digitos(last.getConsecutivo()))
+	        .defaultIfEmpty(UtilsGeneral.devolverConsecutivo12Digitos(""))
+	        .map(consecutivo -> {
+	            TevuAdminAuditoria audit = new TevuAdminAuditoria();
+	            audit.setConsecutivo(consecutivo);
+	            audit.setVista(String.valueOf(entity.get("vista")));
+	            audit.setUsuario(String.valueOf(entity.get("usuario")));
+	            audit.setNup(String.valueOf(entity.get("nup")));
+	            audit.setNus(String.valueOf(entity.get("nus")));
+	            audit.setFecha(UtilConverter.currentDate());
+	            audit.setHora(UtilConverter.getHora(UtilConverter.currentDate()));
+	            audit.setAccion(String.valueOf(entity.get("accion")));
+	            audit.setContenido(UtilConverter.classToDocument(entity.get("contenido")));
+	            return audit;
+	        }).flatMap(tevuAdminAuditoriaRepository::save);
 	}
 
 	@Override

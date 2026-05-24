@@ -1,5 +1,6 @@
 package com.enviexpres.logistica.packmodule.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -66,5 +67,17 @@ public class TevtPaqueteController {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.OK, tevtPaquete), HttpStatus.OK));
 					}
 				});
+	}
+	
+	@GetMapping("/paquete/count/{idEstado}")
+	public Mono<ResponseEntity<Map<String, Object>>> contarPaquetesPorEstado(@PathVariable("idEstado") String idEstado) {
+	    return tevtPaqueteService.findByIdEstado(idEstado)
+	        .map(cantidad -> {
+	            Map<String, Object> data = new HashMap<>();
+	            data.put("idEstado", idEstado);
+	            data.put("cantidad", cantidad);
+	            
+	            return new ResponseEntity<>(UtilConverter.apiResponse(HttpStatus.OK, data), HttpStatus.OK);
+	        });
 	}
 }

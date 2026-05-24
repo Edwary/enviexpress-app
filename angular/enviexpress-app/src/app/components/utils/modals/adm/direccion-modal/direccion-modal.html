@@ -1,0 +1,146 @@
+<div class="m-8 p-4">
+    <div class="mb-4">
+        <h2 class="text-xl font-bold mb-2">Dirección:</h2>
+        <mat-form-field class="w-full sm:w-[700px]">
+            <input matInput readonly [value]="dirText" placeholder="Dirección generada">
+        </mat-form-field>
+    </div>
+    
+    <hr class="my-4">
+    
+    <form [formGroup]="dirForm" (ngSubmit)="submitForm()">
+        
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+            <label class="font-bold w-[110px]">Nomenclatura:</label>
+            <mat-form-field class="w-[150px]">
+                <mat-select [(value)]="selectedOptionNom1" (valueChange)="direccionComplete()">
+                    @for (option of selectDataNom; track option.idNomenclatura) {
+                        <mat-option [value]="option.idNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>  
+
+            <mat-form-field class="w-[100px]">
+                <input matInput [(ngModel)]="num1" (input)="numberChange($event, 'num1')" placeholder="Nro 1" [ngModelOptions]="{standalone: true}">
+                @if (dirForm.controls['num1'].invalid && dirForm.controls['num1'].touched) {
+                  <mat-error>Máx 3 dígitos</mat-error>
+                }
+            </mat-form-field>
+
+            <label class="font-bold ml-2">Letra(s):</label>
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionLtr1" (valueChange)="direccionComplete()">
+                    @for (option of selectDataLtr; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionLtr2" (valueChange)="direccionComplete()">
+                    @for (option of selectDataLtr; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>    
+
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionCar1" (valueChange)="direccionComplete()">
+                    @for (option of selectDataCar; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>           
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+            <mat-form-field class="w-[150px]">
+                <mat-select [(value)]="selectedOptionNom2" (valueChange)="direccionComplete()">
+                    @for (option of selectDataNom; track option.idNomenclatura) {
+                        <mat-option [value]="option.idNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field> 
+
+            <label class="font-bold"> Número: </label>
+            <mat-form-field class="w-[100px]">
+                <input matInput [(ngModel)]="num2" (input)="numberChange($event, 'num2')" placeholder="Nro 2" [ngModelOptions]="{standalone: true}">
+                @if (dirForm.controls['num2'].invalid && dirForm.controls['num2'].touched) {
+                    <mat-error>Máx 3 dígitos</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionLtr3" (valueChange)="direccionComplete()">
+                    @for (option of selectDataLtr; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionLtr4" (valueChange)="direccionComplete()">
+                    @for (option of selectDataLtr; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionCar2" (valueChange)="direccionComplete()">
+                    @for (option of selectDataCar; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field> 
+
+            <label class="font-bold mx-2"> - </label>
+            
+            <mat-form-field class="w-[100px]">
+                <input matInput [(ngModel)]="num3" (input)="numberChange($event, 'num3')" placeholder="Compl." [ngModelOptions]="{standalone: true}">
+                @if (dirForm.controls['num3'].invalid && dirForm.controls['num3'].touched) {
+                    <mat-error>Máx 3 dígitos</mat-error>
+                }
+            </mat-form-field>
+
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionLtr5" (valueChange)="direccionComplete()">
+                    @for (option of selectDataLtr; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-[70px]">
+                <mat-select [(value)]="selectedOptionLtr6" (valueChange)="direccionComplete()">
+                    @for (option of selectDataLtr; track option.nmNomenclatura) {
+                        <mat-option [value]="option.nmNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            <label class="font-bold w-[110px]"> Complemento: </label>
+            <mat-form-field class="w-[150px]">
+                <mat-select [(value)]="selectedOptionCom" (valueChange)="direccionComplete()">
+                    @for (option of selectDataCom; track option.idNomenclatura) {
+                        <mat-option [value]="option.idNomenclatura">{{ option.nmNomenclatura }}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field class="w-full sm:w-[300px]">
+                <input matInput formControlName="complemento" placeholder="Detalle (Ej. Apto 301)" [(ngModel)]="complemento" (change)="direccionComplete()">
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-end gap-4 mt-8">
+            <button mat-button type="submit" [disabled]="dirForm.invalid" class="bg-[#4392F1] text-white disabled:bg-gray-300 hover:bg-blue-600">
+                Aceptar
+            </button>
+            <button mat-button type="button" (click)="closeDialog()" class="bg-[#F7F7FF] text-[#000022] border border-[#000022]">
+                Cerrar
+            </button>
+        </div>
+    </form>
+</div>

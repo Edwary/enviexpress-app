@@ -1,8 +1,7 @@
 package com.enviexpres.logistica.usermodule.service.itf;
 
 import java.util.Map;
-
-import org.bson.Document;
+import java.util.TreeSet;
 
 import com.enviexpres.logistica.usermodule.model.TevsRolMenu;
 
@@ -22,5 +21,7 @@ public interface TevsRolMenuService {
 	Mono<TevsRolMenu> toggle(Map<String, String> entity);
 	
 	Mono<Void> remove(String idRolMenu);
+	
+	Mono<TreeSet<Map<String, Object>>> getMenuTreeByRol(String idRol);
 	
 }

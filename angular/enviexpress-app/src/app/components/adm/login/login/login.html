@@ -1,0 +1,41 @@
+<div class="absolute inset-0 min-h-screen w-full flex items-center justify-center bg-gray-100 p-4">
+  
+  <div class="w-full max-w-md bg-white rounded-xl shadow-2xl p-8 sm:p-10">
+    
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-extrabold text-gray-900">Iniciar Sesión</h2>
+      <p class="text-gray-500 mt-2 text-sm">Ingresa tus credenciales para continuar</p>
+    </div>
+    
+    @if (errorMessage) {
+      <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md text-sm">
+        <p>{{ errorMessage }}</p>
+      </div>
+    }
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2">
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="usuario" placeholder="Ej. jperez">
+        <mat-icon matPrefix class="mr-2 text-gray-400">user</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Contraseña</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="••••••••">
+        <mat-icon matPrefix class="mr-2 text-gray-400">lock</mat-icon>
+      </mat-form-field>
+
+      <button 
+        mat-flat-button 
+        color="primary" 
+        type="submit" 
+        [disabled]="loginForm.invalid" 
+        class="w-full py-6 mt-4 text-base font-semibold transition-all hover:scale-[1.02]">
+        Ingresar
+      </button>
+      
+    </form>
+  </div>
+</div>

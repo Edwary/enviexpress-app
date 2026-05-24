@@ -16,4 +16,11 @@ public interface TevtUsuarioRepository extends ReactiveMongoRepository<TevtUsuar
 	@Query("{ 'nus' : ?0 }")
 	Mono<TevtUsuario> findByNus(String nus);
 	
+	@Query("{ 'nmUsuario' : ?0 }")
+	Mono<TevtUsuario> findByNmUsuario(String nmUsuario);
+	
+	@Query("{ 'email' : ?0 }")
+	Mono<TevtUsuario> findByEmailUsuario(String emailUsuario);
+	
+	Mono<TevtUsuario> findByNmUsuarioOrEmail(String nmUsuario, String email);
 }

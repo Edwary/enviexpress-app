@@ -23,4 +23,6 @@ public interface TevtPaqueteService {
 	Flux<Map<String, Object>> findByIdContains(Map<String, String> where);
 	
 	Mono<TevjPaqueteAccion> updatePaqueteAccion(Map<String, String> entity);
+	
+	Mono<Long> findByIdEstado(String idEstado);
 }

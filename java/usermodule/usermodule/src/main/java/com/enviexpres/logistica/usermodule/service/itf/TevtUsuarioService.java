@@ -17,4 +17,6 @@ public interface TevtUsuarioService {
 	Mono<TevtUsuario> toggle(Map<String, String> entity);
 	
 	Mono<Void> remove(String nus);
+	
+	Mono<Map<String, Object>> login(Map<String, String> login);
 }

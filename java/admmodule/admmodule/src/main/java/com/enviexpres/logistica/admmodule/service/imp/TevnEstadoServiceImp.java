@@ -1,9 +1,6 @@
 package com.enviexpres.logistica.admmodule.service.imp;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,53 +17,67 @@ import reactor.core.publisher.Mono;
 @Service
 public class TevnEstadoServiceImp implements TevnEstadoService {
 
-	@Autowired
-	private TevnEstadoRepository TevnEstadoRepository;
-	
-	@Override
-	public Mono<TevnEstado> create(TevnEstado TevnEstado) {
-		if(Objects.isNull(TevnEstado.getIdEstado())){
-			Flux<TevnEstado> TevnEstadoFlux = TevnEstadoRepository.findAll();
-			List<TevnEstado> TevnEstadoIfContains = TevnEstadoFlux.toStream()
-					.filter(estado -> estado.getNmEstado().equals(TevnEstado.getNmEstado()) || estado.getSbEstado().equals(TevnEstado.getSbEstado()) || estado.getColor().equals(TevnEstado.getColor()))
-					.collect(Collectors.toList());
-			if(TevnEstado.getNmEstado().isEmpty() || TevnEstado.getSbEstado().isEmpty() || TevnEstado.getColor().isEmpty() || TevnEstado.getModulo().isEmpty()) return null;
-			if(TevnEstadoIfContains.size() > 0) return null;
-			if(TevnEstadoFlux.count().block() > 0L) {
-				String valueId = UtilsGeneral.devolverConsecutivo4Digitos(TevnEstadoFlux.last().block().getIdEstado());
-				TevnEstado.setIdEstado(valueId);
-			}else {
-				TevnEstado.setIdEstado("0001");
-			}
-			return TevnEstadoRepository.save(TevnEstado);
-		}else {
-			return TevnEstadoRepository.save(TevnEstado);
-		}
-	}
+    @Autowired
+    private TevnEstadoRepository TevnEstadoRepository;
 
-	@Override
-	public Mono<TevnEstado> findById(String id) {
-		return TevnEstadoRepository.findById(id);
-	}
+    @Override
+    public Mono<TevnEstado> create(TevnEstado TevnEstado) {
+        if (TevnEstado.getIdEstado() != null) {
+            return TevnEstadoRepository.save(TevnEstado);
+        }
 
-	@Override
-	public Flux<TevnEstado> findAll() {
-		return TevnEstadoRepository.findAll();
-	}
+        // Validación básica
+        if (TevnEstado.getNmEstado().isEmpty() || TevnEstado.getSbEstado().isEmpty() 
+            || TevnEstado.getColor().isEmpty() || TevnEstado.getModulo().isEmpty()) {
+            return Mono.empty();
+        }
 
-	@Override
-	public Mono<Void> remove(String id) {
-		TevnEstado TevnEstado = TevnEstadoRepository.findById(id).block();
-		if(TevnEstado.getModulo().equals(Constant.MODULO_TODOS)) {
-			return null;
-		} else {
-			return TevnEstadoRepository.delete(TevnEstado);
-		}
-	}
+        return TevnEstadoRepository.findAll()
+            .collectList()
+            .flatMap(listaEstados -> {
+                // Verificar si ya existe por nombre, abreviatura o color
+                boolean existe = listaEstados.stream().anyMatch(e -> 
+                    e.getNmEstado().equals(TevnEstado.getNmEstado()) || 
+                    e.getSbEstado().equals(TevnEstado.getSbEstado()) || 
+                    e.getColor().equals(TevnEstado.getColor())
+                );
 
-	@Override
-	public Flux<TevnEstado> findIfContains(Map<String, String> filter) {
-		return TevnEstadoRepository.findIfContains(filter);
-	}
+                if (existe) return Mono.empty();
 
+                // Generar ID consecutivo
+                if (!listaEstados.isEmpty()) {
+                    TevnEstado ultimo = listaEstados.get(listaEstados.size() - 1);
+                    TevnEstado.setIdEstado(UtilsGeneral.devolverConsecutivo4Digitos(ultimo.getIdEstado()));
+                } else {
+                    TevnEstado.setIdEstado("0001");
+                }
+                return TevnEstadoRepository.save(TevnEstado);
+            });
+    }
+
+    @Override
+    public Mono<TevnEstado> findById(String id) {
+        return TevnEstadoRepository.findById(id);
+    }
+
+    @Override
+    public Flux<TevnEstado> findAll() {
+        return TevnEstadoRepository.findAll();
+    }
+
+    @Override
+    public Mono<Void> remove(String id) {
+        return TevnEstadoRepository.findById(id)
+            .flatMap(estado -> {
+                if (estado.getModulo().equals(Constant.MODULO_TODOS)) {
+                    return Mono.empty(); 
+                }
+                return TevnEstadoRepository.delete(estado);
+            });
+    }
+
+    @Override
+    public Flux<TevnEstado> findIfContains(Map<String, String> filter) {
+        return TevnEstadoRepository.findIfContains(filter);
+    }
 }

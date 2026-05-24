@@ -15,6 +15,10 @@ public class TevsRolMenu {
 	
 	public TevsRolMenu() {}
 
+	public TevsRolMenu(String idRolMenu) {
+		this.idRolMenu = idRolMenu;
+	}
+	
 	public TevsRolMenu(String uuid, String idRolMenu, String idRol, String idMenu, String idEstado) {
 		super();
 		this.uuid = uuid;

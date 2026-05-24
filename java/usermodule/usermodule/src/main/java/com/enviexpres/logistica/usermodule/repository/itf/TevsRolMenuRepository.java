@@ -20,7 +20,7 @@ public interface TevsRolMenuRepository extends ReactiveMongoRepository<TevsRolMe
 	Mono<TevsRolMenu> findByIdRolMenu(String idRolMenu);
 	
 	@Query("{ 'idRol' : ?0 }")
-	Flux<TevsRolMenu> findByRol(String idRol);
+	Flux<TevsRolMenu> findByIdRol(String idRol);
 	
 	@Aggregation({
 		"{ $match: { $and: [ "

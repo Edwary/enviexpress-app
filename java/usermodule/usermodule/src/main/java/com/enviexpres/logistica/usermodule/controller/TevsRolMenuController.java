@@ -2,6 +2,7 @@ package com.enviexpres.logistica.usermodule.controller;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,5 +67,16 @@ public class TevsRolMenuController {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.OK, tevsRolMenu), HttpStatus.OK));
 					}
 				});
+	}
+	
+	@GetMapping("/rolMenu/ByRol/{idRol}")
+	public Mono<ResponseEntity<TreeSet<Map<String, Object>>>> getMenuByRol(@PathVariable("idRol") String idRol) {
+	    return tevsRolMenuService.getMenuTreeByRol(idRol)
+	            .map(tree -> {
+	                if (tree.isEmpty()) {
+	                    return new ResponseEntity<TreeSet<Map<String, Object>>>(HttpStatus.NOT_FOUND);
+	                }
+	                return new ResponseEntity<>(tree, HttpStatus.OK);
+	            });
 	}
 }

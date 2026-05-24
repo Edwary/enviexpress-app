@@ -15,7 +15,7 @@ public class TevtUsuario {
 	private String nombre;
 	private String password;
 	private String passwordAnt;
-	private String emailUsuario;
+	private String email;
 	private Date fechaCreacion;
 	private String idRol;
 	private String idEstado;
@@ -23,6 +23,10 @@ public class TevtUsuario {
 	
 	public TevtUsuario() {}
 
+	public TevtUsuario (String nus) {
+		this.nus = nus;
+	}
+	
 	public TevtUsuario(String uuid, String nus, String nmUsuario, String nombre, String password, String passwordAnt,
 			String emailUsuario, Date fechaCreacion, String idRol, String idEstado, Date fechaUltimoIngreso) {
 		super();
@@ -32,7 +36,7 @@ public class TevtUsuario {
 		this.nombre = nombre;
 		this.password = password;
 		this.passwordAnt = passwordAnt;
-		this.emailUsuario = emailUsuario;
+		this.email = emailUsuario;
 		this.fechaCreacion = fechaCreacion;
 		this.idRol = idRol;
 		this.idEstado = idEstado;
@@ -87,12 +91,12 @@ public class TevtUsuario {
 		this.passwordAnt = passwordAnt;
 	}
 
-	public String getEmailUsuario() {
-		return emailUsuario;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setEmailUsuario(String emailUsuario) {
-		this.emailUsuario = emailUsuario;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public Date getFechaCreacion() {

@@ -5,8 +5,6 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.ResourceBundle;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 public class UtilsGeneral {
 
 	public static Date currentDate() {
@@ -14,12 +12,7 @@ public class UtilsGeneral {
 		Date fechaDate = Date.from(fechaHoy.atStartOfDay(ZoneId.systemDefault()).toInstant());
 		return fechaDate;
 	}
-	
-	public static String getMessage(String file, String code, HttpServletRequest request) {
-		String language = request != null ? request.getLocale().getLanguage() : "";
-		return getMessage(file, code, language);
-	}
-	
+		
 	public static String getMessage(String file, String core, String language) {
 		ResourceBundle properties = ResourceBundle.getBundle(file + "_" + "es");
 		return properties.getString(core);

@@ -2,7 +2,6 @@ package com.enviexpres.logistica.admmodule.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,19 +45,17 @@ public class TevnEstadoController {
 	
 	@DeleteMapping("/estado/{id}")
 	public Mono<ResponseEntity<Void>> deleteEstado(@PathVariable(value = "id") String id){
-		Mono<Void> monoResponse = tevnEstadoService.remove(id);
-		if(!Objects.isNull(monoResponse)) {
-			return Mono.just(new ResponseEntity<Void>(HttpStatus.I_AM_A_TEAPOT));
-		} else {
-			return Mono.just(new ResponseEntity<Void>(HttpStatus.OK));
-		}
+		return tevnEstadoService.remove(id)
+				.then(Mono.just(new ResponseEntity<Void>(HttpStatus.OK)))
+				.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 	
 	@PostMapping("/estado/contains")
-	public Flux<ResponseEntity<List<TevnEstado>>> getIfContains(@Valid @RequestBody Map<String, String> filter){
-		List<TevnEstado> tevnEstadoList = tevnEstadoService.findIfContains(filter).collectList().block();
-		HttpStatus httpStatus = tevnEstadoList != null ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-		return Flux.just(new ResponseEntity<>(tevnEstadoList, httpStatus));
+	public Mono<ResponseEntity<TevnEstado>> getIfContains(@Valid @RequestBody Map<String, String> filter){
+		return tevnEstadoService.findIfContains(filter)
+				.next()
+				.map(ResponseEntity::ok)
+				.defaultIfEmpty(ResponseEntity.notFound().build());
 	}
 	
 	

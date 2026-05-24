@@ -16,6 +16,7 @@ public class TevnMenu {
 	private String nivel;
 	private String orden;
 	private String indVisible;
+	private String indRol;
 	private String idEstado;
 
 	public TevnMenu() {
@@ -27,7 +28,7 @@ public class TevnMenu {
 	}
 
 	public TevnMenu(String uuid, String idMenu, String nmMenu, String idMenuSup, String tipoMenu, String href,
-			String nivel, String orden, String indVisible, String idEstado) {
+			String nivel, String orden, String indVisible, String indRol, String idEstado) {
 		super();
 		this.uuid = uuid;
 		this.idMenu = idMenu;
@@ -38,6 +39,7 @@ public class TevnMenu {
 		this.nivel = nivel;
 		this.orden = orden;
 		this.indVisible = indVisible;
+		this.indRol = indRol;
 		this.idEstado = idEstado;
 	}
 
@@ -111,6 +113,14 @@ public class TevnMenu {
 
 	public void setIndVisible(String indVisible) {
 		this.indVisible = indVisible;
+	}
+
+	public String getIndRol() {
+		return indRol;
+	}
+
+	public void setIndRol(String indRol) {
+		this.indRol = indRol;
 	}
 
 	public String getIdEstado() {

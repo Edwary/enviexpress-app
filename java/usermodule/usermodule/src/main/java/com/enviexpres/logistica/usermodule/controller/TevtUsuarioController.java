@@ -39,9 +39,9 @@ public class TevtUsuarioController {
 				});
 	}
 	
-	@GetMapping("/usuario/findById/{idusuario}")
-	public Mono<ResponseEntity<Map<String, Object>>> findById(@PathVariable(value="idusuario") String idusuario) {
-		return tevtUsuarioService.findById(idusuario)
+	@GetMapping("/usuario/findById/{idUsuario}")
+	public Mono<ResponseEntity<Map<String, Object>>> findById(@PathVariable(value="idUsuario") String idUsuario) {
+		return tevtUsuarioService.findById(idUsuario)
 				.flatMap(tevtUsuario -> {
 					if(Objects.isNull(tevtUsuario)) {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), HttpStatus.NOT_FOUND));
@@ -62,6 +62,18 @@ public class TevtUsuarioController {
 				.flatMap(tevtUsuario -> {
 					if(Objects.isNull(tevtUsuario)) {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), HttpStatus.NOT_FOUND));
+					} else {
+						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.OK, tevtUsuario), HttpStatus.OK));
+					}
+				});
+	}
+	
+	@PostMapping("/usuario/login")
+	public Mono<ResponseEntity<Map<String, Object>>> login(@Valid @RequestBody Map<String, String> entity) {
+		return tevtUsuarioService.login(entity)
+				.flatMap(tevtUsuario -> {
+					if(Objects.isNull(tevtUsuario)) {
+						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.CONFLICT, null), HttpStatus.CONFLICT));
 					} else {
 						return Mono.just(new ResponseEntity<Map<String, Object>>(UtilConverter.apiResponse(HttpStatus.OK, tevtUsuario), HttpStatus.OK));
 					}

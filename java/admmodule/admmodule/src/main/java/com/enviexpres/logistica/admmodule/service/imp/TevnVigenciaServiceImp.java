@@ -24,29 +24,23 @@ public class TevnVigenciaServiceImp implements TevnVigenciaService {
 	
 	@Override
 	public Mono<TevnVigencia> create(Map<String, Object> entity) {
-		TevnVigencia tevnVigencia = new TevnVigencia();
-		String idVigencia = String.valueOf(entity.get("idVigencia"));
-		if(!idVigencia.isEmpty()) {
-			tevnVigencia = tevnVigenciaRepository.findByIdVigencia(idVigencia).block();
-			tevnVigencia.setNumAnio(String.valueOf(entity.get("numTipoFecha")));
-			tevnVigencia.setFechaInicio(UtilConverter.toDate(String.valueOf(entity.get("fechaInicio"))));
-			tevnVigencia.setFechaFin(UtilConverter.toDate(String.valueOf(entity.get("fechaFin"))));
-			tevnVigencia.setIdEstado(Objects.isNull(entity.get("idEstado")) ? Constant.IND_ESTADO_ACTIVO : String.valueOf(entity.get("idEstado")));
-			return tevnVigenciaRepository.save(tevnVigencia);
-		}else {
-			Flux<TevnVigencia> tevnVigenciaFlux = tevnVigenciaRepository.findAll();
-			
-			if(tevnVigenciaFlux.count().block() > 0L) {
-				tevnVigencia.setIdVigencia(UtilsGeneral.devolverConsecutivo4Digitos(tevnVigenciaFlux.last().block().getIdVigencia()));
-			}else {
-				tevnVigencia.setIdVigencia(UtilsGeneral.devolverConsecutivo4Digitos(""));
-			}
-			tevnVigencia.setNumAnio(String.valueOf(entity.get("numTipoFecha")));
-			tevnVigencia.setFechaInicio(UtilConverter.toDate(String.valueOf(entity.get("fechaInicio"))));
-			tevnVigencia.setFechaFin(UtilConverter.toDate(String.valueOf(entity.get("fechaFin"))));
-			tevnVigencia.setIdEstado(Objects.isNull(entity.get("idEstado")) ? Constant.IND_ESTADO_ACTIVO : String.valueOf(entity.get("idEstado")));
-			return tevnVigenciaRepository.save(tevnVigencia);
-		}
+	    String idVigencia = String.valueOf(entity.get("idVigencia"));
+	    
+	    Mono<TevnVigencia> vigenciaMono = idVigencia.isEmpty() 
+	        ? tevnVigenciaRepository.findAll().reduce((first, last) -> last).map(last -> {
+	            TevnVigencia tv = new TevnVigencia();
+	            tv.setIdVigencia(UtilsGeneral.devolverConsecutivo4Digitos(last.getIdVigencia()));
+	            return tv;
+	        }).defaultIfEmpty(new TevnVigencia())
+	        : tevnVigenciaRepository.findByIdVigencia(idVigencia).defaultIfEmpty(new TevnVigencia());
+
+	    return vigenciaMono.map(tv -> {
+	        tv.setNumAnio(String.valueOf(entity.get("numTipoFecha")));
+	        tv.setFechaInicio(UtilConverter.toDate(String.valueOf(entity.get("fechaInicio"))));
+	        tv.setFechaFin(UtilConverter.toDate(String.valueOf(entity.get("fechaFin"))));
+	        tv.setIdEstado(Objects.isNull(entity.get("idEstado")) ? Constant.IND_ESTADO_ACTIVO : String.valueOf(entity.get("idEstado")));
+	        return tv;
+	    }).flatMap(tevnVigenciaRepository::save);
 	}
 
 	@Override
@@ -61,10 +55,11 @@ public class TevnVigenciaServiceImp implements TevnVigenciaService {
 
 	@Override
 	public Mono<Void> remove(String id) {
-		TevnVigencia tevnVigencia = tevnVigenciaRepository.findByIdVigencia(id).block();
-		tevnVigencia.setIdEstado(Constant.IND_ESTADO_ELIMINADO);
-		tevnVigenciaRepository.save(tevnVigencia);
-		return Mono.empty();
+	    return tevnVigenciaRepository.findByIdVigencia(id)
+	        .flatMap(tv -> {
+	            tv.setIdEstado(Constant.IND_ESTADO_ELIMINADO);
+	            return tevnVigenciaRepository.save(tv);
+	        }).then();
 	}
 
 	@Override
@@ -75,13 +70,11 @@ public class TevnVigenciaServiceImp implements TevnVigenciaService {
 
 	@Override
 	public Mono<TevnVigencia> toggle(Map<String, Object> entity) {
-		TevnVigencia tevnVigencia = tevnVigenciaRepository.findByIdVigencia(String.valueOf(entity.get("idVigencia"))).block();
-		
-		if (!Objects.isNull(tevnVigencia)) {
-			tevnVigencia.setIdEstado(String.valueOf(entity.get("idEstado")));
-		}
-		
-		return tevnVigenciaRepository.save(tevnVigencia);
+	    return tevnVigenciaRepository.findByIdVigencia(String.valueOf(entity.get("idVigencia")))
+	        .map(tv -> {
+	            tv.setIdEstado(String.valueOf(entity.get("idEstado")));
+	            return tv;
+	        }).flatMap(tevnVigenciaRepository::save);
 	}
 
 }
