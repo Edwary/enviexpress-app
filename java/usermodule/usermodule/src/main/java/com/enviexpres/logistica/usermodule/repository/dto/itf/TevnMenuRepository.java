@@ -31,7 +31,7 @@ public interface TevnMenuRepository extends ReactiveMongoRepository<TevnMenu, St
 	        + "] }}",
 	    "{ $addFields: { 'orden_num': { $toInt: '$orden' } } }",
 	    "{ $sort: { 'orden_num': 1 } }",
-	    "{ $project: { 'orden_num': 0 } }" // Elimina el campo 'orden_num' después de ordenar
+	    "{ $project: { 'orden_num': 0 } }" 
 	})
 	Flux<TevnMenu> findObjectIfContains(Map<String, String> filter);
 	

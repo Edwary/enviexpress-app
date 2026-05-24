@@ -70,14 +70,7 @@ public class TevtPaqueteController {
 	}
 	
 	@GetMapping("/paquete/count/{idEstado}")
-	public Mono<ResponseEntity<Map<String, Object>>> contarPaquetesPorEstado(@PathVariable("idEstado") String idEstado) {
-	    return tevtPaqueteService.findByIdEstado(idEstado)
-	        .map(cantidad -> {
-	            Map<String, Object> data = new HashMap<>();
-	            data.put("idEstado", idEstado);
-	            data.put("cantidad", cantidad);
-	            
-	            return new ResponseEntity<>(UtilConverter.apiResponse(HttpStatus.OK, data), HttpStatus.OK);
-	        });
+	public Mono<Long> contarPaquetesPorEstado(@PathVariable("idEstado") String idEstado) {
+	    return tevtPaqueteService.findByIdEstado(idEstado);
 	}
 }

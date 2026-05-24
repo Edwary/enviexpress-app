@@ -1,0 +1,128 @@
+<div class="p-8">
+  <h2 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Clientes</h2>
+
+  <div class="bg-white p-6 rounded-lg shadow mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <input type="text" [(ngModel)]="filtros.nmCliente" placeholder="Nombre" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <input type="text" [(ngModel)]="filtros.documento" placeholder="Documento / NIT" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <input type="text" [(ngModel)]="filtros.email" placeholder="Correo" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <input type="text" [(ngModel)]="filtros.telefono" placeholder="Teléfono" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <select [(ngModel)]="filtros.idEstado" class="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">Todos los estados</option>
+        <option value="0001">Activos</option> <option value="0002">Inactivos</option>
+      </select>
+    </div>
+    
+    <div class="mt-4 flex justify-between">
+      <button (click)="buscarClientes()" class="bg-slate-800 text-white px-6 py-2 rounded hover:bg-slate-900 transition-colors flex items-center">
+        <mat-icon class="mr-2">search</mat-icon> Buscar
+      </button>
+      
+      @if (isAdmin) {
+        <button (click)="abrirModal()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors flex items-center shadow-md">
+          <mat-icon class="mr-2">add</mat-icon> Adicionar Cliente
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b">
+          <th class="p-4">Nombre</th>
+          <th class="p-4">Documento / NIT</th>
+          <th class="p-4">Correo</th>
+          <th class="p-4">Teléfono</th>
+          <th class="p-4">Estado</th>
+          
+          @if (isAdmin) {
+            <th class="p-4 text-center">Acciones</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="text-sm">
+        @if (cargando) {
+          <tr><td colspan="6" class="text-center p-8 text-gray-500">Cargando clientes...</td></tr>
+        } @else {
+          @for (cliente of clientes; track cliente.idCliente) {
+            <tr class="border-b hover:bg-slate-50 transition-colors">
+              <td class="p-4 font-medium text-gray-800">{{ cliente.nmCliente }}</td>
+              <td class="p-4 text-gray-600">{{ cliente.documento }}</td>
+              <td class="p-4 text-gray-600">{{ cliente.email }}</td>
+              <td class="p-4 text-gray-600">{{ cliente.telefono }}</td>
+              <td class="p-4">
+                <span class="px-2 py-1 rounded text-xs font-bold" 
+                      [ngClass]="cliente.idEstado === '0001' ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-800'">
+                  {{ cliente.idEstado === '0001' ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              
+              @if (isAdmin) {
+                <td class="p-4 flex justify-center space-x-3">
+                  <button (click)="abrirModal(cliente)" class="text-blue-500 hover:text-blue-700 transition-colors" title="Editar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button (click)="cambiarEstado(cliente)" class="text-yellow-600 hover:text-yellow-800 transition-colors" title="Cambiar Estado">
+                    <mat-icon>sync_alt</mat-icon>
+                  </button>
+                  <button (click)="eliminarCliente(cliente.idCliente)" class="text-red-500 hover:text-red-700 transition-colors" title="Eliminar">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="text-center p-8 text-gray-500">No se encontraron clientes para los filtros aplicados.</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+@if (isModalOpen) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+      
+      <div class="bg-slate-900 px-6 py-4 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-white">{{ clienteForm.idCliente ? 'Editar Cliente' : 'Adicionar Cliente' }}</h3>
+        <button (click)="cerrarModal()" class="text-gray-300 hover:text-white">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+          <input type="text" [(ngModel)]="clienteForm.nmCliente" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Documento / NIT</label>
+          <input type="text" [(ngModel)]="clienteForm.documento" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+          <input type="email" [(ngModel)]="clienteForm.email" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500">
+        </div> 
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+          <input type="text" [(ngModel)]="clienteForm.telefono" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+          <select [(ngModel)]="clienteForm.idEstado" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500">
+            <option value="0001">Activo</option>
+            <option value="0002">Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3 border-t">
+        <button (click)="cerrarModal()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded hover:bg-gray-100 transition-colors">Cancelar</button>
+        <button (click)="guardarCliente()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">Guardar</button>
+      </div>
+      
+    </div>
+  </div>
+}

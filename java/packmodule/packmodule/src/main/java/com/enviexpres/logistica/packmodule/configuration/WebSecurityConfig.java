@@ -1,19 +1,17 @@
-package com.enviexpres.logistica.packmodule.configuration;
+package com.enviexpres.logistica.packmodule.configuration; // Ajusta a tu paquete
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.config.CorsRegistry;
-import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 @Configuration
-@EnableWebFlux
 public class WebSecurityConfig implements WebFluxConfigurer {
 	
-	@Override
+    @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-		        .allowedOrigins("http://localhost:4200")
-		        .allowedMethods("*")
-		        .allowedHeaders("*");
+                .allowedOrigins("http://localhost:4200")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*");
     }
 }

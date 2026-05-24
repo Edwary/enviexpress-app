@@ -67,4 +67,23 @@ public class TevsClienteController {
 					}
 				});
 	}
+	
+	@PostMapping("/cliente/findIfContains")
+    public Mono<ResponseEntity<Map<String, Object>>> findIfContains(@RequestBody Map<String, String> filter) {
+        
+        return tevsClienteService.findIfContains(filter)
+                .collectList()
+                .map(listaClientes -> {
+                    if (listaClientes.isEmpty()) {
+                        return new ResponseEntity<>(
+                            UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), 
+                            HttpStatus.NOT_FOUND
+                        );
+                    }
+                    return new ResponseEntity<>(
+                        UtilConverter.apiResponse(HttpStatus.OK, listaClientes), 
+                        HttpStatus.OK
+                    );
+                });
+    }
 }

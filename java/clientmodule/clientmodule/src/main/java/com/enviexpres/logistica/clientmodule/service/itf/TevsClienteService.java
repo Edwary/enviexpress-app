@@ -18,4 +18,6 @@ public interface TevsClienteService {
 	Mono<TevsCliente> toggle(Map<String, String> entity);
 	
 	Mono<Void> remove(String idRol);
+	
+	Flux<Map<String, Object>> findIfContains(Map<String, String> where);
 }
