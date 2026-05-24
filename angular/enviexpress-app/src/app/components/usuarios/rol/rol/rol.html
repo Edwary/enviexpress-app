@@ -1,0 +1,126 @@
+<div class="p-4 sm:p-6 lg:p-8 w-full h-full flex flex-col">
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8">Gestión de Roles</h2>
+
+    <div class="bg-white p-4 sm:p-6 rounded-lg shadow mb-6 w-full">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <input type="text" [(ngModel)]="filtros.nombre" placeholder="Nombre del Rol"
+                class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" [(ngModel)]="filtros.sbRol" placeholder="Abreviatura"
+                class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+            
+            <select [(ngModel)]="filtros.idEstado" class="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Todos los estados</option>
+                <option value="0001">Activos</option>
+                <option value="0002">Inactivos</option>
+            </select>
+        </div>
+
+        <div class="mt-6 flex flex-col sm:flex-row justify-between gap-4">
+            <button (click)="buscarRoles()" class="w-full sm:w-auto bg-slate-800 text-white px-6 py-2 rounded hover:bg-slate-900 transition-colors flex items-center justify-center">
+                <mat-icon class="mr-2">search</mat-icon> Buscar
+            </button>
+
+            @if (isAdmin) {
+                <button (click)="abrirModal()" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors flex items-center justify-center shadow-md">
+                    <mat-icon class="mr-2">add</mat-icon> Adicionar Rol
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow w-full flex-1">
+        <div class="overflow-x-auto w-full">
+            <table class="w-full text-left border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-700 uppercase text-xs font-bold border-b">
+                        <th class="p-4 min-w-[200px]">Nombre</th>
+                        <th class="p-4 min-w-[150px]">Abreviatura</th>
+                        <th class="p-4 min-w-[100px]">Estado</th>
+                        @if (isAdmin) { <th class="p-4 text-center min-w-[150px]">Acciones</th> }
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    @if (cargando) {
+                        <tr><td colspan="4" class="text-center p-8 text-gray-500">Cargando roles...</td></tr>
+                    } @else {
+                        @for (rol of roles; track rol.idRol) {
+                            <tr class="border-b hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-medium text-gray-800">{{ rol.nombre }}</td>
+                                <td class="p-4 text-gray-600">{{ rol.sbRol || '-' }}</td>
+                                <td class="p-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="rol.idEstado === '0001' ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-800'">
+                                        {{ rol.idEstado === '0001' ? 'Activo' : 'Inactivo' }}
+                                    </span>
+                                </td>
+                                @if (isAdmin) {
+                                    <td class="p-4 flex justify-center space-x-2">
+                                        <button (click)="abrirModal(rol)" class="p-2 text-blue-500 hover:bg-blue-50 rounded-full transition-colors" title="Editar"><mat-icon>edit</mat-icon></button>
+                                        <button (click)="abrirModalToggle(rol)" class="p-2 text-yellow-600 hover:bg-yellow-50 rounded-full transition-colors" title="Cambiar Estado"><mat-icon>sync_alt</mat-icon></button>
+                                        <button (click)="eliminarRol(rol.idRol)" class="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors" title="Eliminar"><mat-icon>delete</mat-icon></button>
+                                    </td>
+                                }
+                            </tr>
+                        } @empty {
+                            <tr><td colspan="4" class="text-center p-8 text-gray-500">No se encontraron roles.</td></tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (isModalOpen) {
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="bg-slate-900 px-6 py-4 flex justify-between items-center flex-shrink-0">
+            <h3 class="text-lg font-bold text-white">{{ rolForm.idRol ? 'Editar Rol' : 'Adicionar Rol' }}</h3>
+            <button (click)="cerrarModal()" class="text-gray-300 hover:text-white transition-colors"><mat-icon>close</mat-icon></button>
+        </div>
+
+        <div class="p-6 space-y-4 overflow-y-auto">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                <input type="text" [(ngModel)]="rolForm.nombre" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Abreviatura (Opcional)</label>
+                <input type="text" [(ngModel)]="rolForm.sbRol" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select [(ngModel)]="rolForm.idEstado" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                    <option value="0001">Activo</option>
+                    <option value="0002">Inactivo</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 px-6 py-4 flex flex-col-reverse sm:flex-row justify-end gap-3 sm:space-x-3 border-t flex-shrink-0">
+            <button (click)="cerrarModal()" class="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded hover:bg-gray-100 transition-colors text-center">Cancelar</button>
+            <button (click)="guardarRol()" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-center">Guardar</button>
+        </div>
+    </div>
+</div>
+}
+
+@if (isToggleOpen) {
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 text-center">
+        <div class="p-6 space-y-4">
+            <h3 class="text-lg font-bold mb-4 text-gray-800">Cambiar estado del rol</h3>
+            <div class="text-left">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select [(ngModel)]="rolForm.idEstado" class="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow">
+                    <option value="0001">Activo</option>
+                    <option value="0002">Inactivo</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex flex-col-reverse sm:flex-row justify-center gap-3 sm:space-x-4 mt-2">
+            <button (click)="cerrarModalToggle()" class="w-full sm:w-auto px-6 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors font-medium">Cancelar</button>
+            <button (click)="confirmarCambioEstado()" class="w-full sm:w-auto px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors font-medium">Confirmar</button>
+        </div>
+    </div>
+</div>
+}

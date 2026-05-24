@@ -190,4 +190,29 @@ public class TevsRolMenuServiceImp implements TevsRolMenuService {
 	    map.put("estado", m.getIdEstado());
 	    return map;
 	}
+
+	@Override
+	public Flux<Map<String, Object>> findIfContains(Map<String, String> where) {
+		return tevsRolMenuRepository.findIfContains(where)
+		        .flatMap(document -> {
+		            try {
+		            	TevsRolMenu tevsRolMenu = UtilConverter.documentToClass(TevsRolMenu.class, (Document) document.get("tevs_rol_menu"));
+		                TevnRol tevnRol = UtilConverter.documentToClass(TevnRol.class, (Document) document.get("tevn_rol"));
+		                TevnMenu tevnMenu = UtilConverter.documentToClass(TevnMenu.class, (Document) document.get("tevn_menu"));
+		                TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
+		                
+		                Map<String, Object> tevsRolMenuMap = UtilConverter.classToMapEspecifico(tevsRolMenu);
+		                tevsRolMenuMap.put("nmMenu", tevnMenu.getNmMenu());
+		                tevsRolMenuMap.put("nmRol", tevnRol.getNombre());
+		                tevsRolMenuMap.put("nmEstado", tevnEstado.getNmEstado());
+		                tevsRolMenuMap.put("color", tevnEstado.getColor());
+		                
+		                return Mono.just(tevsRolMenuMap);
+		            } catch (Exception e) {
+		                TevnError tevnError = UtilConverter.createError(e, Constant.MODULO_USUARIOS);
+		                return tevnErrorRepository.save(tevnError)
+		                    .then(Mono.error(new ValidationException(HttpStatus.BAD_REQUEST, "Sin Información")));
+		            }
+		        });
+	}
 }

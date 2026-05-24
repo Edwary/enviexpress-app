@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -86,4 +87,15 @@ public class TevsClienteController {
                     );
                 });
     }
+	
+	 @DeleteMapping("/cliente/{idCliente}")
+	 public Mono<ResponseEntity<Object>> deleteClienteById(@PathVariable(value="idCliente") String idCliente) {
+		 return tevsClienteService.remove(idCliente)
+			        .then(Mono.defer(() -> {
+			            return Mono.just(new ResponseEntity<>(
+			                UtilConverter.apiResponse(HttpStatus.OK, "Cliente eliminado correctamente"), 
+			                HttpStatus.OK
+			            ));
+			        }));
+	 }
 }

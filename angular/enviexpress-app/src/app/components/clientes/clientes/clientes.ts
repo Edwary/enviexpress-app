@@ -17,9 +17,9 @@ export class ClienteComponent implements OnInit {
 
   clientes: any[] = [];
   cargando: boolean = false;
-  isAdmin: boolean = false; // Controla si se muestran los botones y acciones
+  isAdmin: boolean = false; 
 
-  // Objeto para los filtros de búsqueda
+  // Filtros de búsqueda
   filtros = {
     nmCliente: '',
     documento: '',
@@ -28,12 +28,11 @@ export class ClienteComponent implements OnInit {
     idEstado: ''
   };
 
-  // Variables para la Modal
   isModalOpen: boolean = false;
+  isToggle: boolean = false;
   clienteForm: any = {};
 
   ngOnInit() {
-    // Validamos el rol sin romper el SSR de Angular
     if (isPlatformBrowser(this.platformId)) {
       const idRol = localStorage.getItem('idRol');
       this.isAdmin = idRol === '0001';
@@ -45,7 +44,6 @@ export class ClienteComponent implements OnInit {
     this.cargando = true;
     this.clienteService.getClientes(this.filtros).subscribe({
       next: (res) => {
-        console.log('Clientes obtenidos:', res.body);
         this.clientes = res.body; 
         this.cargando = false;
         this.cdr.detectChanges();
@@ -61,10 +59,8 @@ export class ClienteComponent implements OnInit {
 
   abrirModal(cliente?: any) {
     if (cliente) {
-      // Editar: Clonamos el objeto para no afectar la fila hasta que se guarde
       this.clienteForm = { ...cliente };
     } else {
-      // Crear: Formulario vacío
       this.clienteForm = {
         idCliente: '', 
         nmCliente: '',
@@ -86,7 +82,7 @@ export class ClienteComponent implements OnInit {
     this.clienteService.saveCliente(this.clienteForm).subscribe({
       next: () => {
         this.cerrarModal();
-        this.buscarClientes(); // Recargamos la tabla
+        this.buscarClientes();
       },
       error: (err) => console.error('Error guardando cliente', err)
     });
@@ -101,10 +97,21 @@ export class ClienteComponent implements OnInit {
     }
   }
 
-  cambiarEstado(cliente: any) {
-    this.clienteService.toggleCliente(cliente).subscribe({
+  cambiarEstado() {
+    this.clienteService.toggleCliente(this.clienteForm).subscribe({
       next: () => this.buscarClientes(),
       error: (err) => console.error('Error al cambiar el estado', err)
     });
+    this.isToggle = false;
+  }
+
+  abrirModalToggle(cliente: any) {
+    this.clienteForm = { ...cliente };
+    this.isToggle = true;
+  }
+
+  cerrarModalToggle() {
+    this.isToggle = false;
+    this.clienteForm = {};
   }
 }

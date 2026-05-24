@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,4 +80,34 @@ public class TevtUsuarioController {
 					}
 				});
 	}
+	
+	@PostMapping("/usuario/findIfContains")
+    public Mono<ResponseEntity<Map<String, Object>>> findIfContains(@RequestBody Map<String, String> filter) {
+        
+        return tevtUsuarioService.findIfContains(filter)
+                .collectList()
+                .map(listaUsuarios -> {
+                    if (listaUsuarios.isEmpty()) {
+                        return new ResponseEntity<>(
+                            UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), 
+                            HttpStatus.NOT_FOUND
+                        );
+                    }
+                    return new ResponseEntity<>(
+                        UtilConverter.apiResponse(HttpStatus.OK, listaUsuarios), 
+                        HttpStatus.OK
+                    );
+                });
+    }
+	
+	@DeleteMapping("/usuario/{idUsuario}")
+	 public Mono<ResponseEntity<Object>> deleteUsuarioById(@PathVariable(value="idUsuario") String idUsuario) {
+		 return tevtUsuarioService.remove(idUsuario)
+			        .then(Mono.defer(() -> {
+			            return Mono.just(new ResponseEntity<>(
+			                UtilConverter.apiResponse(HttpStatus.OK, "Usuario eliminado correctamente"), 
+			                HttpStatus.OK
+			            ));
+			        }));
+	 }
 }

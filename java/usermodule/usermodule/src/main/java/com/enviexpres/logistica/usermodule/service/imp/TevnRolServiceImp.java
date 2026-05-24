@@ -2,14 +2,19 @@ package com.enviexpres.logistica.usermodule.service.imp;
 
 import java.util.Map;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.enviexpres.logistica.usermodule.model.TevnRol;
+import com.enviexpres.logistica.usermodule.model.dto.TevnError;
+import com.enviexpres.logistica.usermodule.model.dto.TevnEstado;
+import com.enviexpres.logistica.usermodule.repository.dto.itf.TevnErrorRepository;
 import com.enviexpres.logistica.usermodule.repository.itf.TevnRolRepository;
 import com.enviexpres.logistica.usermodule.service.itf.TevnRolService;
 import com.enviexpres.logistica.usermodule.utils.Constant;
+import com.enviexpres.logistica.usermodule.utils.UtilConverter;
 import com.enviexpres.logistica.usermodule.utils.UtilsGeneral;
 import com.enviexpres.logistica.usermodule.utils.exception.ValidationException;
 
@@ -22,6 +27,9 @@ public class TevnRolServiceImp implements TevnRolService {
 
 	@Autowired
 	private TevnRolRepository tevnRolRepository;
+	
+	@Autowired
+	private TevnErrorRepository tevnErrorRepository;
 	
 	@Override
 	public Mono<TevnRol> create(Map<String, String> entity) {
@@ -71,6 +79,27 @@ public class TevnRolServiceImp implements TevnRolService {
 	    return tevnRolRepository.findByIdRol(idRol)
 	        .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Rol no encontrado")))
 	        .flatMap(tevnRol -> tevnRolRepository.delete(tevnRol));
+	}
+
+	@Override
+	public Flux<Map<String, Object>> findIfContains(Map<String, String> where) {
+		return tevnRolRepository.findIfContains(where)
+		        .flatMap(document -> {
+		            try {
+		                TevnRol tevnRol = UtilConverter.documentToClass(TevnRol.class, (Document) document.get("tevn_rol"));
+		                TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
+		                
+		                Map<String, Object> tevnRolMap = UtilConverter.classToMapEspecifico(tevnRol);
+		                tevnRolMap.put("nmEstado", tevnEstado.getNmEstado());
+		                tevnRolMap.put("color", tevnEstado.getColor());
+		                
+		                return Mono.just(tevnRolMap);
+		            } catch (Exception e) {
+		                TevnError tevnError = UtilConverter.createError(e, Constant.MODULO_USUARIOS);
+		                return tevnErrorRepository.save(tevnError)
+		                    .then(Mono.error(new ValidationException(HttpStatus.BAD_REQUEST, "Sin Información")));
+		            }
+		        });
 	}
 
 	

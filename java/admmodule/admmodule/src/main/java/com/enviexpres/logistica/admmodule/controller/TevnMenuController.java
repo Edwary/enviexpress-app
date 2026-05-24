@@ -2,7 +2,6 @@ package com.enviexpres.logistica.admmodule.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +29,7 @@ public class TevnMenuController {
 	@Autowired
     private TevnMenuService tevnMenuService;
     
-    @PostMapping("/create/menu")
+    @PostMapping("/menu/create")
     public Mono<ResponseEntity<Map<String, Object>>> createMenu(@Valid @RequestBody Map<String, Object> entity){
         return tevnMenuService.create(entity)
                 .map(menu -> ResponseEntity.ok(UtilConverter.apiResponse(HttpStatus.OK, menu)))
@@ -81,5 +80,24 @@ public class TevnMenuController {
         return tevnMenuService.toggle(entity)
                 .map(menu -> ResponseEntity.ok(UtilConverter.apiResponse(HttpStatus.OK, menu)))
                 .defaultIfEmpty(ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(UtilConverter.apiResponse(HttpStatus.I_AM_A_TEAPOT, null)));
+    }
+    
+    @PostMapping("/menu/findIfContains")
+    public Mono<ResponseEntity<Map<String, Object>>> findMenuIfContains(@RequestBody Map<String, String> filter) {
+        
+        return tevnMenuService.findMenuIfContains(filter)
+                .collectList()
+                .map(listaMenus -> {
+                    if (listaMenus.isEmpty()) {
+                        return new ResponseEntity<>(
+                            UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), 
+                            HttpStatus.NOT_FOUND
+                        );
+                    }
+                    return new ResponseEntity<>(
+                        UtilConverter.apiResponse(HttpStatus.OK, listaMenus), 
+                        HttpStatus.OK
+                    );
+                });
     }
 }

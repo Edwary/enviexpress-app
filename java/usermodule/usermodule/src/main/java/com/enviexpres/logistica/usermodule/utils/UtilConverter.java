@@ -216,6 +216,27 @@ public class UtilConverter {
 			return map;
 		}
 		
+		public static <T> Map<String, Object> classToMapEspecifico(T object) {
+			Map<String, Object> map = new HashMap<>();
+		    Class<?> clazz = object.getClass();
+		    
+		    while (clazz != null && clazz != Object.class) {
+		        for(Field field : clazz.getDeclaredFields()) {
+		            field.setAccessible(true);
+		            try {
+		                Object value = field.get(object);
+		                
+		                map.putIfAbsent(field.getName(), value);
+		            } catch(IllegalAccessException e) {
+		                throw new IllegalArgumentException("Ha ocurrido un error convirtiendo el objeto a un map.");
+		            }
+		        }
+		        clazz = clazz.getSuperclass();
+		    }
+		    
+		    return map;
+		}
+		
 		@SuppressWarnings("deprecation")
 		public static <T> T mapToClass(Map<String, ?> map, Class<T> clazz)  throws IllegalAccessException, InstantiationException {
 			T object = clazz.newInstance();

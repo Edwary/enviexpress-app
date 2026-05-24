@@ -24,4 +24,6 @@ public interface TevsRolMenuService {
 	
 	Mono<TreeSet<Map<String, Object>>> getMenuTreeByRol(String idRol);
 	
+	Flux<Map<String, Object>> findIfContains(Map<String, String> where);
+	
 }

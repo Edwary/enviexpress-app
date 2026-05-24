@@ -3,6 +3,7 @@ package com.enviexpres.logistica.usermodule.service.imp;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.enviexpres.logistica.usermodule.model.TevnRol;
 import com.enviexpres.logistica.usermodule.model.TevtUsuario;
 import com.enviexpres.logistica.usermodule.model.dto.TevnError;
+import com.enviexpres.logistica.usermodule.model.dto.TevnEstado;
 import com.enviexpres.logistica.usermodule.repository.dto.itf.TevnErrorRepository;
 import com.enviexpres.logistica.usermodule.repository.itf.TevnRolRepository;
 import com.enviexpres.logistica.usermodule.repository.itf.TevtUsuarioRepository;
@@ -38,7 +40,6 @@ public class TevtUsuarioServiceImp implements TevtUsuarioService {
 	@Override
 	public Mono<TevtUsuario> create(Map<String, String> entity) {
 	    String nus = entity.get("nus");
-	    String idUsuario = entity.get("idUsuario");
 	    String idRol = entity.get("idRol");
 
 	    Mono<TevtUsuario> usuarioMono = StringUtils.isEmpty(nus)
@@ -49,7 +50,7 @@ public class TevtUsuarioServiceImp implements TevtUsuarioService {
 	                return nuevo;
 	            })
 	            .defaultIfEmpty(new TevtUsuario(UtilsGeneral.devolverConsecutivo12Digitos("0")))
-	        : tevtUsuarioRepository.findByNus(idUsuario)
+	        : tevtUsuarioRepository.findByNus(nus)
 	            .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Usuario no encontrado")));
 
 	    Mono<TevnRol> rolMono = tevnRolRepository.findByIdRol(idRol)
@@ -68,6 +69,7 @@ public class TevtUsuarioServiceImp implements TevtUsuarioService {
 	                tevtUsuario.setFechaCreacion(UtilConverter.currentDate());
 	                tevtUsuario.setIdRol(tevnRol.getIdRol());
 	                tevtUsuario.setIdEstado(entity.get("idEstado"));
+	                tevtUsuario.setFechaUltimoIngreso(UtilConverter.currentDate());
 
 	                return tevtUsuarioRepository.save(tevtUsuario);
 	                
@@ -130,14 +132,35 @@ public class TevtUsuarioServiceImp implements TevtUsuarioService {
 		            }
 		            
 		            user.setFechaUltimoIngreso(UtilConverter.currentDate());
-		            tevtUsuarioRepository.save(user);
-		            
-		            Map<String, Object> userMap = UtilConverter.classToMap(user);
-		            return Mono.just(userMap);
+		            return tevtUsuarioRepository.save(user)
+		                    .map(savedUser -> UtilConverter.classToMap(savedUser));
 		        });
 	    } catch (NoSuchAlgorithmException e) {
             return Mono.error(new ValidationException(HttpStatus.INTERNAL_SERVER_ERROR, "Error al procesar los datos de sesión"));
         }
+	}
+
+	@Override
+	public Flux<Map<String, Object>> findIfContains(Map<String, String> where) {
+		return tevtUsuarioRepository.findIfContains(where)
+		        .flatMap(document -> {
+		            try {
+		                TevtUsuario tevtUsuario = UtilConverter.documentToClass(TevtUsuario.class, (Document) document.get("tevt_usuario"));
+		                TevnRol tevnRol = UtilConverter.documentToClass(TevnRol.class, (Document) document.get("tevn_rol"));
+		                TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
+		                
+		                Map<String, Object> tevtUsuarioMap = UtilConverter.classToMapEspecifico(tevtUsuario);
+		                tevtUsuarioMap.put("nmRol", tevnRol.getNombre());
+		                tevtUsuarioMap.put("nmEstado", tevnEstado.getNmEstado());
+		                tevtUsuarioMap.put("color", tevnEstado.getColor());
+		                
+		                return Mono.just(tevtUsuarioMap);
+		            } catch (Exception e) {
+		                TevnError tevnError = UtilConverter.createError(e, Constant.MODULO_USUARIOS);
+		                return tevnErrorRepository.save(tevnError)
+		                    .then(Mono.error(new ValidationException(HttpStatus.BAD_REQUEST, "Sin Información")));
+		            }
+		        });
 	}
 	
 }

@@ -1,5 +1,7 @@
 package com.enviexpres.logistica.usermodule.repository.itf;
 
+import java.util.Map;
+
 import org.bson.Document;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.Query;
@@ -44,4 +46,34 @@ public interface TevsRolMenuRepository extends ReactiveMongoRepository<TevsRolMe
 		+ " } }"
 	})
 	Flux<Document> findByRolMenuObject(String idRol);
+	
+	@Aggregation({
+		"{ $match: { $and: [ "
+							+ "    { $or: [ "
+						    + "        { 'idRol' : { $regex: ?#{[0].get('idRol') == null ? '' : [0].get('idRol') }, $options: 'i' } }, "
+						    + "        { 'idRol' : { $exists: false } }"
+						    + "    ] }, "
+						    + "    { $or: [ "
+						    + "        { 'idMenu' : { $regex: ?#{[0].get('idMenu') == null ? '' : [0].get('idMenu') }, $options: 'i' } }, "
+						    + "        { 'idMenu' : { $exists: false } }"
+						    + "    ] }, "
+						    + "    { $or: [ "
+						    + "        { 'idEstado' : { $regex: ?#{[0].get('idEstado') == null ? '' : [0].get('idEstado') }, $options: 'i' } }, "
+						    + "        { 'idEstado' : { $exists: false } }"
+						    + "    ] }, "
+							+ " ] } "
+		+ "}",
+		"{ $lookup: { from: 'tevn_rol', localField: 'idRol', foreignField: 'idRol', as: 'tevn_rol'  } }",
+		"{ $unwind: { path: '$tevn_rol', preserveNullAndEmptyArrays: true } }",
+		"{ $lookup: { from: 'tevn_menu', localField: 'idMenu', foreignField: 'idMenu', as: 'tevn_menu'  } }",
+		"{ $unwind: { path: '$tevn_menu', preserveNullAndEmptyArrays: true } }",
+		"{ $lookup: { from: 'tevn_estado', localField: 'idEstado', foreignField: '_id', as: 'tevn_estado'  } }",
+		"{ $unwind: { path: '$tevn_estado', preserveNullAndEmptyArrays: true } }",
+		"{ $project: {	'tevs_rol_menu' : '$$ROOT', "
+		+ "				'tevn_rol' : 1, "
+		+ "				'tevn_menu' : 1, "
+		+ "				'tevn_estado' : 1 "
+		+ " } }"
+	})
+	Flux<Document> findIfContains(Map<String, String> where);
 }

@@ -26,4 +26,6 @@ public interface TevnMenuService {
 	Flux<TreeSet<Map<String, Object>>> findIfContains(Map<String, String> filter);
 	
 	Mono<TevnMenu> toggle(Map<String, Object> entity);
+	
+	Flux<Map<String, Object>> findMenuIfContains(Map<String, String> where);
 }

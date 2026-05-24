@@ -19,4 +19,6 @@ public interface TevtUsuarioService {
 	Mono<Void> remove(String nus);
 	
 	Mono<Map<String, Object>> login(Map<String, String> login);
+	
+	Flux<Map<String, Object>> findIfContains(Map<String, String> where);
 }

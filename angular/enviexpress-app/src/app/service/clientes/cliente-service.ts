@@ -16,7 +16,7 @@ export class ClienteService {
   }
 
   toggleCliente(cliente: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/toggle`, cliente);
+    return this.http.put(`${this.baseUrl}/toggle`, cliente);
   }
 
   deleteCliente(idCliente: string): Observable<any> {

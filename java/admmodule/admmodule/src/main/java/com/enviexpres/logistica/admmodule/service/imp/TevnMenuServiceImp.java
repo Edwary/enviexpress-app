@@ -7,11 +7,15 @@ import java.util.Objects;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.enviexpres.logistica.admmodule.model.TevnError;
+import com.enviexpres.logistica.admmodule.model.TevnEstado;
 import com.enviexpres.logistica.admmodule.model.TevnMenu;
+import com.enviexpres.logistica.admmodule.repository.itf.TevnErrorRepository;
 import com.enviexpres.logistica.admmodule.repository.itf.TevnMenuRepository;
 import com.enviexpres.logistica.admmodule.service.itf.TevnMenuService;
 import com.enviexpres.logistica.admmodule.utils.Constant;
@@ -28,6 +32,9 @@ public class TevnMenuServiceImp implements TevnMenuService {
 	@Autowired
     private TevnMenuRepository tevnMenuRepository;
 
+	@Autowired
+	private TevnErrorRepository tevnErrorRepository;
+	
     @Override
     public Mono<TevnMenu> create(Map<String, Object> entity) {
         String idMenu = String.valueOf(entity.get("idMenu"));
@@ -51,7 +58,7 @@ public class TevnMenuServiceImp implements TevnMenuService {
 
     @Override
     public Mono<Void> remove(String id) {
-        return tevnMenuRepository.findById(id)
+        return tevnMenuRepository.findByIdMenu(id)
                 .flatMap(tevnMenuRepository::delete);
     }
 
@@ -176,6 +183,27 @@ public class TevnMenuServiceImp implements TevnMenuService {
 		return tevnMenuRepository.findAll().sort((tvvnMenu1, tvvnMenu2) -> {
 			return tvvnMenu1.getOrden().compareTo(tvvnMenu2.getOrden());
 		});
+	}
+
+	@Override
+	public Flux<Map<String, Object>> findMenuIfContains(Map<String, String> where) {
+		return tevnMenuRepository.findIfContains(where)
+		        .flatMap(document -> {
+		            try {
+		                TevnMenu tevnMenu = UtilConverter.documentToClass(TevnMenu.class, (Document) document.get("tevn_menu"));
+		                TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
+		                
+		                Map<String, Object> tevnMenuMap = UtilConverter.classToMap(tevnMenu);
+		                tevnMenuMap.put("nmEstado", tevnEstado.getNmEstado());
+		                tevnMenuMap.put("color", tevnEstado.getColor());
+		                
+		                return Mono.just(tevnMenuMap);
+		            } catch (Exception e) {
+		                TevnError tevnError = UtilConverter.createError(e, Constant.MODULO_USUARIOS);
+		                return tevnErrorRepository.save(tevnError)
+		                    .then(Mono.error(new ValidationException(HttpStatus.BAD_REQUEST, "Sin Información")));
+		            }
+		        });
 	}
 	
 }

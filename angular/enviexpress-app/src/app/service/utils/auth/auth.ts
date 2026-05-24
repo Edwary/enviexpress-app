@@ -17,6 +17,7 @@ export class AuthService {
           
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('idRol', this.rolUsuario);
+            localStorage.setItem('idUsuario', response.body.body.nus);
           }
         }
       })
