@@ -151,12 +151,6 @@ Consulta: {
 }
 ---
 
-Aquí tienes la sección adicional redactada con un enfoque de arquitectura *Cloud-Native*, ideal para anexar al final de tu `README.md`.
-
-He estructurado la propuesta utilizando las mejores prácticas de AWS para aislar el frontend, orquestar los microservicios sin administrar servidores y garantizar alta disponibilidad en las bases de datos.
-
----
-
 ## Estrategia de Despliegue en AWS (Propuesta Arquitectónica)
 
 Para llevar este ecosistema logístico a un entorno de producción escalable, seguro y de alta disponibilidad, se propone una arquitectura basada en servicios administrados de AWS. Esta estrategia minimiza la carga operativa (Serverless) y maximiza el rendimiento reactivo del sistema.
