@@ -24,18 +24,19 @@ public interface TevjPaqueteEstadoRepository extends ReactiveMongoRepository<Tev
 		
 		"{ $sort: { 'fechaEstado': -1 } }",
 	    
-		"{ $lookup: { from: 'tevj_paquete_estado', localField: 'uuid', foreignField: 'uuid', as: 'tevj_paquete_estado' } }",
-	    "{ $unwind: { path: '$tevj_paquete_estado', preserveNullAndEmptyArrays: true } }",
-	    "{ $lookup: { from: 'tevt_paquete', localField: 'idPaquete', foreignField: 'idPaquete', as: 'tevt_paquete' } }",
+		"{ $lookup: { from: 'tevt_paquete', localField: 'idPaquete', foreignField: 'idPaquete', as: 'tevt_paquete' } }",
 	    "{ $unwind: { path: '$tevt_paquete', preserveNullAndEmptyArrays: true } }",
 	    "{ $lookup: { from: 'tevt_usuario', localField: 'nus', foreignField: 'nus', as: 'tevt_usuario' } }",
 	    "{ $unwind: { path: '$tevt_usuario', preserveNullAndEmptyArrays: true } }",
-	    "{ $lookup: { from: 'tevn_estado', localField: 'idEstado', foreignField: 'idEstado', as: 'tevn_estado' } }",
+	    "{ $lookup: { from: 'tevn_estado', localField: 'idEstado', foreignField: '_id', as: 'tevn_estado' } }",
 	    "{ $unwind: { path: '$tevn_estado', preserveNullAndEmptyArrays: true } }",
+	    "{ $lookup: { from: 'tevn_estado', localField: 'idEstadoAnterior', foreignField: '_id', as: 'tevn_estado_ant' } }",
+	    "{ $unwind: { path: '$tevn_estado_ant', preserveNullAndEmptyArrays: true } }",
 	    "{ $project: { "
-			    + "    'tevj_paquete_estado' : 1, "
+			    + "    'tevj_paquete_estado' : '$$ROOT', "
 			    + "    'tevt_paquete' : 1, "
-			    + "    'tevn_estado' : 1 "
+			    + "    'tevn_estado' : 1, "
+			    + "    'tevn_estado_ant' : 1 "
 	    + "} }"
 	})
 	Flux<Document> findByIdPaquete(String idPaquete);

@@ -24,16 +24,19 @@ public interface TevtPaqueteRepository extends ReactiveMongoRepository<TevtPaque
 
 	@Aggregation({
 	    "{ $match: { 'idPaquete' : { $regex: ?0, $options: 'i' } } }",
-	    "{ $lookup: { from: 'tevt_paquete', localField: 'idPaquete', foreignField: 'idPaquete', as: 'tevt_paquete' } }",
-	    "{ $unwind: { path: '$tevt_paquete', preserveNullAndEmptyArrays: true } }",
-	    "{ $lookup: { from: 'tevt_cliente', localField: 'idCliente', foreignField: 'idCliente', as: 'tevt_cliente' } }",
+	    "{ $lookup: { from: 'tevs_client', localField: 'idCliente', foreignField: 'idCliente', as: 'tevt_cliente' } }",
 	    "{ $unwind: { path: '$tevt_cliente', preserveNullAndEmptyArrays: true } }",
+	    "{ $lookup: { from: 'tevn_destinatario', localField: 'destinatario', foreignField: 'idDestinatario', as: 'tevn_destinatario' } }",
+	    "{ $unwind: { path: '$tevn_destinatario', preserveNullAndEmptyArrays: true } }",
 	    "{ $lookup: { from: 'tevt_ciudad', localField: 'idCiudad', foreignField: '_id', as: 'tevt_ciudad' } }",
 	    "{ $unwind: { path: '$tevt_ciudad', preserveNullAndEmptyArrays: true } }",
 	    "{ $lookup: { from: 'tevs_departamento', localField: 'idDepartamento', foreignField: 'codigoDane', as: 'tevs_departamento' } }",
 	    "{ $unwind: { path: '$tevs_departamento', preserveNullAndEmptyArrays: true } }",
+	    "{ $lookup: { from: 'tevn_estado', localField: 'idEstado', foreignField: '_id', as: 'tevn_estado' } }",
+	    "{ $unwind: { path: '$tevn_estado', preserveNullAndEmptyArrays: true } }",
 	    "{ $project: { "
-	    + "    	'tevt_paquete' : 1, "
+	    + "    	'tevt_paquete' : '$$ROOT', "
+	    + "		'tevn_destinatario' : 1, "		
 	    + "		'tevt_cliente' : 1, "
 	    + "    	'tevt_ciudad' : 1, "
 	    + "    	'tevs_departamento' : 1, "
@@ -63,22 +66,23 @@ public interface TevtPaqueteRepository extends ReactiveMongoRepository<TevtPaque
 						    + "    { 'fechaCreacion' : { $gte: ?1, $lte: ?2 } } "
 						    + " ] } "
 	    + "}",
-	    "{ $lookup: { from: 'tevt_paquete', localField: 'idPaquete', foreignField: 'idPaquete', as: 'tevt_paquete' } }",
-	    "{ $unwind: { path: '$tevt_paquete', preserveNullAndEmptyArrays: true } }",
-	    "{ $lookup: { from: 'tevt_cliente', localField: 'idCliente', foreignField: 'idCliente', as: 'tevt_cliente' } }",
+	    "{ $lookup: { from: 'tevs_client', localField: 'idCliente', foreignField: 'idCliente', as: 'tevt_cliente' } }",
 	    "{ $unwind: { path: '$tevt_cliente', preserveNullAndEmptyArrays: true } }",
+	    "{ $lookup: { from: 'tevn_destinatario', localField: 'destinatario', foreignField: 'idDestinatario', as: 'tevn_destinatario' } }",
+	    "{ $unwind: { path: '$tevn_destinatario', preserveNullAndEmptyArrays: true } }",
 	    "{ $lookup: { from: 'tevt_ciudad', localField: 'idCiudad', foreignField: '_id', as: 'tevt_ciudad' } }",
 	    "{ $unwind: { path: '$tevt_ciudad', preserveNullAndEmptyArrays: true } }",
 	    "{ $lookup: { from: 'tevs_departamento', localField: 'idDepartamento', foreignField: 'codigoDane', as: 'tevs_departamento' } }",
 	    "{ $unwind: { path: '$tevs_departamento', preserveNullAndEmptyArrays: true } }",
-	    "{ $lookup: { from: 'tevn_estado', localField: 'idEstado', foreignField: 'idEstado', as: 'tevn_estado' } }",
+	    "{ $lookup: { from: 'tevn_estado', localField: 'idEstado', foreignField: '_id', as: 'tevn_estado' } }",
 	    "{ $unwind: { path: '$tevn_estado', preserveNullAndEmptyArrays: true } }",
 	    "{ $project: { "
-				    + "    'tevt_paquete' : 1, "
-				    + "    'tevt_cliente' : 1, " 
-				    + "    'tevt_ciudad' : 1, "
-				    + "    'tevs_departamento' : 1, "
-				    + "    'tevn_estado' : 1 "
+				    + "    	'tevt_paquete' 		: '$$ROOT', "
+				    + "		'tevn_destinatario'	: 1, "
+				    + "    	'tevt_cliente' 		: 1, " 
+				    + "    	'tevt_ciudad' 		: 1, "
+				    + "    	'tevs_departamento'	: 1, "
+				    + "    	'tevn_estado' 		: 1 "
 	    + "} }"
 	})
 	Flux<Document> findIfContains(Map<String, String> where, Date fechaInicio, Date fechaFin);

@@ -106,40 +106,35 @@ public class TevtCiudadServiceImp implements TevtCiudadService {
 
 	@Override
 	public Flux<Map<String, Object>> findIfContains(Map<String, String> filter) {
-		List<Map<String, Object>> tevtCiudadesMapList = new ArrayList<Map<String, Object>>();
-		Flux<Document> tevtCiudadObjectFlux = tevtCiudadRepository.findObjectIfContains(filter);
-		tevtCiudadObjectFlux.map(document -> {
-			Map<String, Object> resultMap = new HashMap<>();
-			for(String key : document.keySet()) {
-				resultMap.put(key, document.get(key));
-			}
-			return resultMap;
-		}).collectList().block().stream()
-		.forEach(tevtCiudadObject -> {
-			try {
-				Map<String, Object> tevtCiudadMap = new HashMap<>();
-				TevtCiudad tevtCiudad = UtilConverter.documentToClass(TevtCiudad.class, (Document) tevtCiudadObject.get("tevt_ciudad"));
-				if(!tevtCiudad.getIdEstado().equals(Constant.IND_ESTADO_ELIMINADO)) {
-					TevsDepartamento tevsDepartamento = UtilConverter.documentToClass(TevsDepartamento.class, (Document) tevtCiudadObject.get("tevs_departamento"));
-					TevpPais tevpPais = UtilConverter.documentToClass(TevpPais.class, (Document) tevtCiudadObject.get("tevp_pais"));
-					TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) tevtCiudadObject.get("tevn_estado"));
-					tevtCiudadMap = UtilConverter.classToMap(tevtCiudad);
-					tevtCiudadMap.put("nmDepartamento", tevsDepartamento.getNmDepartamento());
-					tevtCiudadMap.put("sbDepartamento", tevsDepartamento.getSbDepartamento());
-					tevtCiudadMap.put("nmPais", tevpPais.getNmPais());
-					tevtCiudadMap.put("sbPais", tevpPais.getSbPais());
-					tevtCiudadMap.put("nmEstado", tevnEstado.getNmEstado());
-					tevtCiudadMap.put("sbEstado", tevnEstado.getSbEstado());
-					tevtCiudadesMapList.add(tevtCiudadMap);
-				}
-			} catch (IllegalAccessException | InstantiationException e) {
-				TevnError tevnError = UtilConverter.createError(e, MODULO);
-				tevnErrorRepository.save(tevnError);
-				throw new ValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.InformacionUsuario");
-			}
-		});
-		Flux<Map<String, Object>> tevtCiudadesMapFlux = Flux.fromIterable(tevtCiudadesMapList);
-		return tevtCiudadesMapFlux;
+	    return tevtCiudadRepository.findObjectIfContains(filter)
+	        .flatMap(document -> {
+	            try {
+	                TevtCiudad tevtCiudad = UtilConverter.documentToClass(TevtCiudad.class, (Document) document.get("tevt_ciudad"));
+	                
+	                if (Constant.IND_ESTADO_ELIMINADO.equals(tevtCiudad.getIdEstado())) {
+	                    return Mono.empty(); 
+	                }
+	                
+	                TevsDepartamento tevsDepartamento = UtilConverter.documentToClass(TevsDepartamento.class, (Document) document.get("tevs_departamento"));
+	                TevpPais tevpPais = UtilConverter.documentToClass(TevpPais.class, (Document) document.get("tevp_pais"));
+	                TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
+	                
+	                Map<String, Object> tevtCiudadMap = UtilConverter.classToMap(tevtCiudad);
+	                tevtCiudadMap.put("nmDepartamento", tevsDepartamento.getNmDepartamento());
+	                tevtCiudadMap.put("sbDepartamento", tevsDepartamento.getSbDepartamento());
+	                tevtCiudadMap.put("nmPais", tevpPais.getNmPais());
+	                tevtCiudadMap.put("sbPais", tevpPais.getSbPais());
+	                tevtCiudadMap.put("nmEstado", tevnEstado.getNmEstado());
+	                tevtCiudadMap.put("sbEstado", tevnEstado.getSbEstado());
+	                
+	                return Mono.just(tevtCiudadMap);
+	                
+	            } catch (Exception e) {
+	                TevnError tevnError = UtilConverter.createError(e, MODULO);
+	                return tevnErrorRepository.save(tevnError)
+	                    .then(Mono.error(new ValidationException(HttpStatus.BAD_REQUEST, "general.atom.error.InformacionUsuario")));
+	            }
+	        });
 	}
 
 	@Override

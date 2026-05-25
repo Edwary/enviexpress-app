@@ -58,15 +58,15 @@ public class TevtCiudadController {
     }
 
     @PostMapping("/ciudad/contains")
-    public Mono<ResponseEntity<List<Map<String, Object>>>> getCiudadContains(@Valid @RequestBody Map<String, String> filter) {
+    public Mono<ResponseEntity<Map<String, Object>>> getCiudadContains(@Valid @RequestBody Map<String, String> filter) {
         return tevtCiudadService.findIfContains(filter)
                 .collectList()
                 .map(list -> {
-                    if (list.isEmpty()) {
-                        return new ResponseEntity<List<Map<String, Object>>>(HttpStatus.NOT_FOUND);
-                    }
-                    return new ResponseEntity<>(list, HttpStatus.OK);
-                });
+                    return new ResponseEntity<>(
+                        UtilConverter.apiResponse(HttpStatus.OK, list), 
+                        HttpStatus.OK
+                    );
+                }).defaultIfEmpty(new ResponseEntity<>(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null),HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/ciudad/{id}")

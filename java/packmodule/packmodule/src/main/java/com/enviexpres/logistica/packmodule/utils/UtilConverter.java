@@ -37,7 +37,7 @@ public class UtilConverter {
 			if(fecha.isEmpty()) {
 				fecha = "31-12-9999";
 			}else if(fecha.equals(".")) {
-				fecha = "01-01-9999";
+				fecha = "01-01-1900";
 			}
 			DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 			long f = 0;

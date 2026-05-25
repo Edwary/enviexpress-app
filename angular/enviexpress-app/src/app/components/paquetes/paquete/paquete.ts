@@ -8,11 +8,14 @@ import { UbicacionService } from '../../../service/ubicacion/ubicacion-service';
 import { EstadoService } from '../../../service/estado/estado-service';
 import { UtilsService } from '../../../service/utils/utils-service';
 
+import { DatePipe } from '@angular/common';
+
 @Component({
   selector: 'app-paquete',
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule],
-  templateUrl: './paquete.html'
+  templateUrl: './paquete.html',
+  providers: [DatePipe]
 })
 export class PaqueteComponent implements OnInit {
   private paqueteService = inject(PaqueteService);
@@ -32,7 +35,7 @@ export class PaqueteComponent implements OnInit {
   usuarioNus: string = '';
 
   // Filtros principales
-  filtros = { idCliente: '', idEstado: '', ciudad: '', fechaInicio: '', fechaFin: '' };
+  filtros = { idCliente: '', idEstado: '', idCiudad: '', fechaInicio: '', fechaFin: '' };
   filtroClienteDisplay: string = '';
   filtroCiudadDisplay: string = '';
 
@@ -63,11 +66,27 @@ export class PaqueteComponent implements OnInit {
     }
     this.cargarEstados();
     this.buscarPaquetes();
+    this.buscarClientesModal();
+    this.buscarCiudadesModal();
   }
 
   cargarEstados() {
-    this.estadoService.getEstadosPorModulo('PAQUETES').subscribe(res => {
-      this.estadosPaquete = res.data ? res.data : res;
+    this.estadoService.getEstadosPorModulo('PAQUETES').subscribe({
+      next: (res: any) => {
+        if (Array.isArray(res)) {
+          this.estadosPaquete = res;
+        } else if (res && Array.isArray(res.data)) {
+          this.estadosPaquete = res.data;
+        } else if (res && Array.isArray(res.body)) {
+          this.estadosPaquete = res.body;
+        } else {
+          this.estadosPaquete = [];
+        }
+      },
+      error: (err) => {
+        console.error('Error cargando estados', err);
+        this.estadosPaquete = [];
+      }
     });
   }
 
@@ -75,11 +94,26 @@ export class PaqueteComponent implements OnInit {
     this.cargando = true;
     this.paqueteService.getPaquetes(this.filtros).subscribe({
       next: (res: any) => {
-        this.paquetes = res.data ? res.data : res;
+        // Blindaje: Buscamos el arreglo sin importar dónde lo esconda el backend
+        if (Array.isArray(res)) {
+          this.paquetes = res;
+        } else if (res && Array.isArray(res.data)) {
+          this.paquetes = res.data;
+        } else if (res && Array.isArray(res.body)) {
+          this.paquetes = res.body;
+        } else {
+          // Si no hay datos (ej. un 404 controlado), forzamos el arreglo vacío
+          this.paquetes = []; 
+        }
+        
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: () => { this.paquetes = []; this.cargando = false; this.cdr.detectChanges(); }
+      error: () => { 
+        this.paquetes = []; 
+        this.cargando = false; 
+        this.cdr.detectChanges(); 
+      }
     });
   }
 
@@ -90,7 +124,7 @@ export class PaqueteComponent implements OnInit {
 
   buscarClientesModal() {
     this.clienteService.getClientes(this.filtrosModalCliente).subscribe(res => {
-      this.clientesSelector = res.data ? res.data : res;
+      this.clientesSelector = res.body ? res.body : res;
     });
   }
 
@@ -112,13 +146,13 @@ export class PaqueteComponent implements OnInit {
 
   buscarCiudadesModal() {
     this.ubicacionService.getCiudades(this.filtrosModalCiudad).subscribe(res => {
-      this.ciudadesSelector = res.data ? res.data : res;
+      this.ciudadesSelector = res.body ? res.body : res;
     });
   }
 
   seleccionarCiudad(ciudad: any) {
     if (this.origenSelector === 'filtro') {
-      this.filtros.ciudad = ciudad.idCiudad;
+      this.filtros.idCiudad = ciudad.idCiudad;
       this.filtroCiudadDisplay = `${ciudad.codigoPostal} - ${ciudad.nmCiudad}`;
     } else {
       this.paqueteForm.idCiudad = ciudad.idCiudad;
@@ -136,16 +170,16 @@ export class PaqueteComponent implements OnInit {
       this.paqueteForm.ciudadDisplay = 'Ciudad Cargada';
     } else {
       this.paqueteForm = {
-        idPaquete: '', idCliente: '', destinatario: '', direccion: '', idCiudad: '',
-        idDepartamento: '', telefono: '', peso: '', valorDeclarado: '', idEstado: '0008' // Registrado
+        idPaquete: '', idCliente: '', documentoDestinatario: '', nombreDestinatario: '', telefonoDestinatario: '', 
+        direccion: '', idCiudad: '', idDepartamento: '', telefono: '', peso: '', valorDeclarado: '', idEstado: '0008' 
       };
     }
     this.modales.principal = true;
   }
 
   guardarPaquete() {
-    if (!this.paqueteForm.destinatario) {
-      this.utilsService.openSnackBar('El destinatario no puede estar en blanco', 'error');
+    if (!this.paqueteForm.documentoDestinatario) {
+      this.utilsService.openSnackBar('El documento del destinatario no puede estar en blanco', 'error');
       return;
     }
     this.paqueteService.savePaquete(this.paqueteForm).subscribe({
@@ -188,13 +222,33 @@ export class PaqueteComponent implements OnInit {
 
   abrirRoadmap(idPaquete: string) {
     this.modales.roadmap = true;
+    this.paqueteDetalle = [];
     this.cargarDetalleRoadmap(idPaquete);
   }
 
   cargarDetalleRoadmap(idPaquete: string) {
-    this.paqueteService.getPaqueteById(idPaquete).subscribe(res => {
-      this.paqueteDetalle = res.data ? res.data : res;
-      this.procesarColoresRoadmap();
+    this.paqueteService.getPaqueteById(idPaquete).subscribe({
+      next: (res: any) => {
+        
+        if (res && res.body && res.body.estados) {
+          this.paqueteDetalle = res.body;
+        } else if (res && res.data && res.data.body) {
+          this.paqueteDetalle = res.data.body;
+        } else if (res && res.data) {
+          this.paqueteDetalle = res.data;
+        } else {
+          this.paqueteDetalle = res;
+        }
+
+        this.procesarColoresRoadmap();
+        
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => {
+        console.error('Error cargando el detalle del paquete', err);
+        this.paqueteDetalle = null;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -222,12 +276,11 @@ export class PaqueteComponent implements OnInit {
     });
   }
 
-  // Acciones Rápidas Operador
   operadorAccion(tipo: string) {
     this.toggleForm = { idPaquete: this.paqueteDetalle.idPaquete, nus: this.usuarioNus };
     
     if (tipo === 'avanzar') {
-      this.toggleForm.idEstado = ''; // Limpiar para que seleccione en la modal
+      this.toggleForm.idEstado = ''; 
       this.modales.avanzarEstado = true;
     } else {
       if (tipo === 'novedad') this.toggleForm.idEstado = '0013';
@@ -236,5 +289,12 @@ export class PaqueteComponent implements OnInit {
       if (tipo === 'liquidacion') this.toggleForm.idEstado = '0012';
       this.ejecutarToggle();
     }
+  }
+
+  borrarFiltros() {
+    this.filtros = { idCliente: '', idEstado: '', idCiudad: '', fechaInicio: '', fechaFin: '' };
+    this.filtroClienteDisplay = '';
+    this.filtroCiudadDisplay = '';
+    this.buscarPaquetes();
   }
 }

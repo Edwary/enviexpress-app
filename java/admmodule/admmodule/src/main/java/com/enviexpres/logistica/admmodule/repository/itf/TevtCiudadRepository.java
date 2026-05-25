@@ -95,15 +95,15 @@ public interface TevtCiudadRepository extends ReactiveMongoRepository<TevtCiudad
 							+ "		] }, "
 							+ " ] }"
 		+ "}",
-	    "{ $lookup: { from: 'tvvt_ciudad', localField: '_id', foreignField: '_id', as: 'tvvt_ciudad' } }",
-	    "{ $unwind: { path: '$tvvt_ciudad' } }",
-	    "{ $lookup: { from: 'tvvs_departamento', localField: 'idDepartamento', foreignField: 'codigoDane', as: 'tvvs_departamento' } }",
-	    "{ $unwind: { path: '$tvvs_departamento' } }",
-	    "{ $lookup: { from: 'tvvp_pais', localField: 'tvvs_departamento.idPais', foreignField: '_id', as: 'tvvp_pais' } }",
-	    "{ $unwind: { path: '$tvvp_pais' } }",
-	    "{ $lookup: { from: 'tvvn_estado', localField: 'idEstado', foreignField: '_id', as: 'tvvn_estado' } }",
-	    "{ $unwind: { path: '$tvvn_estado' } }",
-	    "{ $project: { 'tvvt_ciudad': 1, 'tvvs_departamento': 2, 'tvvp_pais': 3, 'tvvn_estado': 4 } }"
+	    "{ $lookup: { from: 'tevt_ciudad', localField: '_id', foreignField: '_id', as: 'tevt_ciudad' } }",
+	    "{ $unwind: { path: '$tevt_ciudad' } }",
+	    "{ $lookup: { from: 'tevs_departamento', localField: 'idDepartamento', foreignField: 'codigoDane', as: 'tevs_departamento' } }",
+	    "{ $unwind: { path: '$tevs_departamento' } }",
+	    "{ $lookup: { from: 'tevp_pais', localField: 'tevs_departamento.idPais', foreignField: '_id', as: 'tevp_pais' } }",
+	    "{ $unwind: { path: '$tevp_pais' } }",
+	    "{ $lookup: { from: 'tevn_estado', localField: 'idEstado', foreignField: '_id', as: 'tevn_estado' } }",
+	    "{ $unwind: { path: '$tevn_estado' } }",
+	    "{ $project: { 'tevt_ciudad': 1, 'tevs_departamento': 1, 'tevp_pais': 1, 'tevn_estado': 1 } }"
 	})
 	Flux<Document> findObjectIfContains(Map<String, String> filter);
 	

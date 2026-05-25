@@ -73,4 +73,17 @@ public class TevtPaqueteController {
 	public Mono<Long> contarPaquetesPorEstado(@PathVariable("idEstado") String idEstado) {
 	    return tevtPaqueteService.findByIdEstado(idEstado);
 	}
+	
+	@PostMapping("/paquete/findIfContains")
+    public Mono<ResponseEntity<Map<String, Object>>> findMenuIfContains(@RequestBody Map<String, String> filter) {
+        
+        return tevtPaqueteService.findByIdContains(filter)
+                .collectList()
+                .map(listaPaquetes -> {
+                    return new ResponseEntity<>(
+                        UtilConverter.apiResponse(HttpStatus.OK, listaPaquetes), 
+                        HttpStatus.OK
+                    );
+                }).defaultIfEmpty(new ResponseEntity<>(UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null),HttpStatus.NOT_FOUND));
+    }
 }

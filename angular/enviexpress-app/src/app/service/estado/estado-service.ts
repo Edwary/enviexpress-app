@@ -10,7 +10,7 @@ export class EstadoService {
   private baseUrl = 'http://localhost:8080/estado';
 
   getEstadosPorModulo(modulo: string): Observable<any> { 
-    return this.http.get(`${this.baseUrl}/${modulo}`); 
+    return this.http.post(`${this.baseUrl}/contains`, { 'modulo' : 'PAQUETES' }); 
   }
 }
   

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.enviexpres.logistica.packmodule.model.TevjPaqueteAccion;
 import com.enviexpres.logistica.packmodule.model.TevjPaqueteEstado;
+import com.enviexpres.logistica.packmodule.model.TevnDestinatario;
 import com.enviexpres.logistica.packmodule.model.TevtPaquete;
 import com.enviexpres.logistica.packmodule.model.dto.TevnError;
 import com.enviexpres.logistica.packmodule.model.dto.TevnEstado;
@@ -21,6 +22,7 @@ import com.enviexpres.logistica.packmodule.model.dto.TevtCiudad;
 import com.enviexpres.logistica.packmodule.repository.dto.itf.TevnErrorRepository;
 import com.enviexpres.logistica.packmodule.repository.itf.TevjPaqueteAccionRepository;
 import com.enviexpres.logistica.packmodule.repository.itf.TevjPaqueteEstadoRepository;
+import com.enviexpres.logistica.packmodule.repository.itf.TevnDestinatarioRepository;
 import com.enviexpres.logistica.packmodule.repository.itf.TevtPaqueteRepository;
 import com.enviexpres.logistica.packmodule.service.itf.TevtPaqueteService;
 import com.enviexpres.logistica.packmodule.utils.Constant;
@@ -47,45 +49,82 @@ public class TvetPaqueteServiceImp implements TevtPaqueteService {
 	@Autowired
 	private TevnErrorRepository tevnErrorRepository;
 
+	@Autowired
+	private TevnDestinatarioRepository tevnDestinatarioRepository;
+	
 	@Override
 	public Mono<TevtPaquete> create(Map<String, String> entity) {
-	    Mono<TevtPaquete> paqueteMono;
 	    
-	    if (StringUtils.isEmpty(entity.get("idPaquete"))) { 
-	        TevtPaquete nuevo = new TevtPaquete();
-	        ObjectId uuid = new ObjectId();
-	        nuevo.setUuid(uuid.toHexString());
-	        nuevo.setIdPaquete(UtilConverter.convertObjectIdToNumber(uuid.toHexString()));
-	        nuevo.setFechaCreacion(UtilConverter.currentDate());
-	        paqueteMono = Mono.just(nuevo);
-	    } else {
-	        paqueteMono = tevtPaqueteRepository.findByIdPaquete(entity.get("idPaquete"))
-	            .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Paquete base no encontrado")));
+	    String documentoDest = entity.get("documentoDestinatario");
+	    String nombreDest = entity.get("nombreDestinatario");
+	    String telefonoDest = entity.get("telefono") != null ? entity.get("telefono") : entity.get("idTelefono");
+
+	    if (StringUtils.isEmpty(documentoDest)) {
+	        return Mono.error(new ValidationException(HttpStatus.BAD_REQUEST, "El documento del destinatario es obligatorio"));
 	    }
 
-	    return paqueteMono.flatMap(tevtPaquete -> {
-	        tevtPaquete.setIdCliente(entity.get("idCliente"));
-	        tevtPaquete.setDestinatario(entity.get("destinatario"));
-	        tevtPaquete.setDireccion(entity.get("direccion"));
-	        tevtPaquete.setIdCiudad(entity.get("idCiudad"));
-	        tevtPaquete.setIdDepartamento(entity.get("idDepartamento"));
-	        tevtPaquete.setTelefono(entity.get("idTelefono"));
-	        tevtPaquete.setPeso(entity.get("peso"));
-	        tevtPaquete.setValorDeclarado(entity.get("valorDeclarado"));
-	        tevtPaquete.setIdEstado(Constant.IND_ESTADO_REGISTRADO);
-	        
-	        // Guardamos paquete y luego el estado inicial de manera encadenada
-	        return tevtPaqueteRepository.save(tevtPaquete).flatMap(paqueteGuardado -> {
-	            TevjPaqueteEstado tevjPaqueteEstado = new TevjPaqueteEstado();
-	            tevjPaqueteEstado.setIdPaquete(paqueteGuardado.getIdPaquete());
-	            tevjPaqueteEstado.setIdEstado(Constant.IND_ESTADO_REGISTRADO);
-	            tevjPaqueteEstado.setIdEstadoAnterior(Constant.IND_ESTADO_NUEVO);
-	            tevjPaqueteEstado.setNus(entity.get("nus"));
-	            tevjPaqueteEstado.setFechaEstado(UtilsGeneral.currentDate());
+	    Mono<TevnDestinatario> destinatarioMono = tevnDestinatarioRepository.findByDocumento(documentoDest)
+	    	    .switchIfEmpty(Mono.defer(() -> {
+	    	        return tevnDestinatarioRepository.findTopByOrderByIdDestinatarioDesc()
+	    	                .defaultIfEmpty(new TevnDestinatario()) 
+	    	                .map(last -> {
+	    	                    TevnDestinatario tevnDest = new TevnDestinatario();
+	    	                    
+	    	                    ObjectId uuidDest = new ObjectId();
+	    	                    tevnDest.setUuid(uuidDest.toHexString());
+	    	                    
+	    	                    String lastId = last.getIdDestinatario();
+	    	                    tevnDest.setIdDestinatario(UtilsGeneral.devolverConsecutivo12Digitos(lastId == null ? "0" : lastId));
+	    	                    tevnDest.setDocumento(documentoDest);
+	    	                    tevnDest.setNombre(StringUtils.isEmpty(nombreDest) ? "Sin Nombre" : nombreDest);
+	    	                    tevnDest.setTelefono(telefonoDest);
+	    	                    tevnDest.setFechaCreacion(UtilConverter.currentDate());
+	    	                    tevnDest.setIdEstado(Constant.IND_ESTADO_ACTIVO);
+	    	                    
+	    	                    return tevnDest;
+	    	                })
+	    	                .flatMap(tevnDest -> tevnDestinatarioRepository.save(tevnDest));
+	    	    }));
+
+	    Mono<TevtPaquete> paqueteBaseMono = StringUtils.isEmpty(entity.get("idPaquete")) 
+	        ? Mono.fromCallable(() -> {
+	            TevtPaquete nuevo = new TevtPaquete();
+	            ObjectId uuid = new ObjectId();
+	            nuevo.setUuid(uuid.toHexString());
+	            nuevo.setIdPaquete(UtilConverter.convertObjectIdToNumber(uuid.toHexString()));
+	            nuevo.setFechaCreacion(UtilConverter.currentDate());
+	            return nuevo;
+	        })
+	        : tevtPaqueteRepository.findByIdPaquete(entity.get("idPaquete"))
+	            .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Paquete base no encontrado")));
+
+	    return destinatarioMono.flatMap(destinatario -> 
+	        paqueteBaseMono.flatMap(tevtPaquete -> {
 	            
-	            return tevjPaqueteEstadoRepository.save(tevjPaqueteEstado).thenReturn(paqueteGuardado);
-	        });
-	    });
+	            tevtPaquete.setIdCliente(entity.get("idCliente"));
+	            
+	            tevtPaquete.setDestinatario(destinatario.getIdDestinatario());
+	            
+	            tevtPaquete.setDireccion(entity.get("direccion"));
+	            tevtPaquete.setIdCiudad(entity.get("idCiudad"));
+	            tevtPaquete.setIdDepartamento(entity.get("idDepartamento"));
+	            tevtPaquete.setTelefono(telefonoDest);
+	            tevtPaquete.setPeso(entity.get("peso"));
+	            tevtPaquete.setValorDeclarado(entity.get("valorDeclarado"));
+	            tevtPaquete.setIdEstado(Constant.IND_ESTADO_REGISTRADO);
+	            
+	            return tevtPaqueteRepository.save(tevtPaquete).flatMap(paqueteGuardado -> {
+	                TevjPaqueteEstado tevjPaqueteEstado = new TevjPaqueteEstado();
+	                tevjPaqueteEstado.setIdPaquete(paqueteGuardado.getIdPaquete());
+	                tevjPaqueteEstado.setIdEstado(Constant.IND_ESTADO_REGISTRADO);
+	                tevjPaqueteEstado.setIdEstadoAnterior(Constant.IND_ESTADO_NUEVO);
+	                tevjPaqueteEstado.setNus(entity.get("nus"));
+	                tevjPaqueteEstado.setFechaEstado(UtilsGeneral.currentDate());
+	                
+	                return tevjPaqueteEstadoRepository.save(tevjPaqueteEstado).thenReturn(paqueteGuardado);
+	            });
+	        })
+	    );
 	}
 
 	@Override
@@ -94,15 +133,24 @@ public class TvetPaqueteServiceImp implements TevtPaqueteService {
 	        .switchIfEmpty(Mono.error(new ValidationException(HttpStatus.NOT_FOUND, "Paquete no encontrado")))
 	        .flatMap(tevtPaqueteDocument -> {
 	            try {
-	                TevtPaquete tevtPaquete = UtilConverter.documentToClass(TevtPaquete.class, (Document) tevtPaqueteDocument.get("tvet_paquete"));
-	                TevtCiudad tevtCiudad = UtilConverter.documentToClass(TevtCiudad.class, (Document) tevtPaqueteDocument.get("tvet_ciudad"));
-	                TevsDepartamento tevsDepartamento = UtilConverter.documentToClass(TevsDepartamento.class, (Document) tevtPaqueteDocument.get("tves_departamento"));
+	                TevtPaquete tevtPaquete = UtilConverter.documentToClass(TevtPaquete.class, (Document) tevtPaqueteDocument.get("tevt_paquete"));
+	                TevtCiudad tevtCiudad = UtilConverter.documentToClass(TevtCiudad.class, (Document) tevtPaqueteDocument.get("tevt_ciudad"));
+	                TevsDepartamento tevsDepartamento = UtilConverter.documentToClass(TevsDepartamento.class, (Document) tevtPaqueteDocument.get("tevs_departamento"));
+	                TevnDestinatario tevnDestinatario = UtilConverter.documentToClass(TevnDestinatario.class, (Document) tevtPaqueteDocument.get("tevn_destinatario"));
+	                TevsCliente tevtCliente = UtilConverter.documentToClass(TevsCliente.class, (Document) tevtPaqueteDocument.get("tevt_cliente"));
+	                TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) tevtPaqueteDocument.get("tevn_estado"));
 	                
 	                Map<String, Object> tevtPaqueteMap = UtilConverter.classToMap(tevtPaquete);
+	                tevtPaqueteMap.put("nmDestinatario", tevnDestinatario.getNombre());
+	                tevtPaqueteMap.put("documentoDestinatario", tevnDestinatario.getDocumento());
+	                tevtPaqueteMap.put("cliente", tevtCliente.getNmCliente());
+	                tevtPaqueteMap.put("documentoCliente", tevtCliente.getDocumento());
 	                tevtPaqueteMap.put("nmCiudad", tevtCiudad.getNmCiudad());
 	                tevtPaqueteMap.put("codigoPostal", tevtCiudad.getCodigoPostal());
 	                tevtPaqueteMap.put("nmDepartamento", tevsDepartamento.getNmDepartamento());
 	                tevtPaqueteMap.put("codigoDane", tevsDepartamento.getCodigoPostal());
+	                tevtPaqueteMap.put("nmEstado", tevnEstado.getNmEstado());
+	                tevtPaqueteMap.put("color", tevnEstado.getColor());
 
 	                // Obtener estados asíncronamente
 	                return tevjPaqueteEstadoRepository.findByIdPaquete(idPaquete)
@@ -110,14 +158,18 @@ public class TvetPaqueteServiceImp implements TevtPaqueteService {
 	                        try {
 	                            Map<String, Object> tevjPaqueteEstadoMap = new HashMap<>();
 	                            TevjPaqueteEstado estado = UtilConverter.documentToClass(TevjPaqueteEstado.class, (Document) document.get("tevj_paquete_estado"));
-	                            TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
+	                            TevnEstado estadoActual = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
+	                            TevnEstado estadoAnterior = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado_ant"));
 	                            
 	                            tevjPaqueteEstadoMap.put("uuid", estado.getUuid());
 	                            tevjPaqueteEstadoMap.put("fecha", estado.getFechaEstado());
 	                            tevjPaqueteEstadoMap.put("observaciones", estado.getObservaciones());
 	                            tevjPaqueteEstadoMap.put("idEstado", tevnEstado.getIdEstado());
-	                            tevjPaqueteEstadoMap.put("nmEstado", tevnEstado.getNmEstado());
-	                            tevjPaqueteEstadoMap.put("color", tevnEstado.getColor());
+	                            tevjPaqueteEstadoMap.put("nmEstado", estadoActual.getNmEstado());
+	                            tevjPaqueteEstadoMap.put("color", estadoActual.getColor());
+	                            tevjPaqueteEstadoMap.put("nmEstadoAnterior", estadoAnterior.getNmEstado());
+	                            tevjPaqueteEstadoMap.put("colorAnterior", estadoAnterior.getColor());
+	                            tevjPaqueteEstadoMap.put("observaciones", StringUtils.isEmpty(estado.getObservaciones()) ? "" : estado.getObservaciones());
 	                            return Mono.just(tevjPaqueteEstadoMap);
 	                        } catch (Exception e) {
 	                            return Mono.error(e);
@@ -236,20 +288,26 @@ public class TvetPaqueteServiceImp implements TevtPaqueteService {
 
 	@Override
 	public Flux<Map<String, Object>> findByIdContains(Map<String, String> where) {
-	    Date fechaInicio = UtilConverter.toDate(where.get("fechaInicio"));
-	    Date fechaFin = UtilConverter.toDate(where.get("fechaFin"));
+	    Date fechaInicio = UtilConverter.toDate(StringUtils.isEmpty(where.get("fechaInicio")) ? "." : where.get("fechaInicio"));
+	    Date fechaFin = UtilConverter.toDate(StringUtils.isEmpty(where.get("fechaFin")) ? "" : where.get("fechaFin"));
 	    
 	    return tevtPaqueteRepository.findIfContains(where, fechaInicio, fechaFin)
 	        .flatMap(document -> {
 	            try {
 	                TevtPaquete tevtPaquete = UtilConverter.documentToClass(TevtPaquete.class, (Document) document.get("tevt_paquete"));
 	                TevsCliente tevtCliente = UtilConverter.documentToClass(TevsCliente.class, (Document) document.get("tevt_cliente"));
+	                TevnDestinatario tevnDestinatario = UtilConverter.documentToClass(TevnDestinatario.class, (Document) document.get("tevn_destinatario"));
 	                TevtCiudad tevtCiudad = UtilConverter.documentToClass(TevtCiudad.class, (Document) document.get("tevt_ciudad"));
 	                TevsDepartamento tevsDepartamento = UtilConverter.documentToClass(TevsDepartamento.class, (Document) document.get("tevs_departamento"));
 	                TevnEstado tevnEstado = UtilConverter.documentToClass(TevnEstado.class, (Document) document.get("tevn_estado"));
 	                
 	                Map<String, Object> tevtPaqueteMap = UtilConverter.classToMap(tevtPaquete);
+	                tevtPaqueteMap.put("nmDestinatario", tevnDestinatario.getNombre());
+	                tevtPaqueteMap.put("documentoDestinatario", tevnDestinatario.getDocumento());
+	                tevtPaqueteMap.put("telefonoDestinatario", tevnDestinatario.getTelefono());
 	                tevtPaqueteMap.put("cliente", tevtCliente.getNmCliente());
+	                tevtPaqueteMap.put("documentoCliente", tevtCliente.getDocumento());
+	                tevtPaqueteMap.put("telefonoCliente", tevtCliente.getTelefono());
 	                tevtPaqueteMap.put("nmCiudad", tevtCiudad.getNmCiudad());
 	                tevtPaqueteMap.put("nmDepartamento", tevsDepartamento.getNmDepartamento());
 	                tevtPaqueteMap.put("nmEstado", tevnEstado.getNmEstado());

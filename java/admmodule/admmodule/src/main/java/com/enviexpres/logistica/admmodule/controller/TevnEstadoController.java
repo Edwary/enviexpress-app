@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.enviexpres.logistica.admmodule.model.TevnEstado;
 import com.enviexpres.logistica.admmodule.service.itf.TevnEstadoService;
+import com.enviexpres.logistica.admmodule.utils.UtilConverter;
 
 import jakarta.validation.Valid;
 import reactor.core.publisher.Flux;
@@ -51,11 +52,21 @@ public class TevnEstadoController {
 	}
 	
 	@PostMapping("/estado/contains")
-	public Mono<ResponseEntity<TevnEstado>> getIfContains(@Valid @RequestBody Map<String, String> filter){
+	public Mono<ResponseEntity<Map<String, Object>>> getIfContains(@Valid @RequestBody Map<String, String> filter){
 		return tevnEstadoService.findIfContains(filter)
-				.next()
-				.map(ResponseEntity::ok)
-				.defaultIfEmpty(ResponseEntity.notFound().build());
+				.collectList()
+                .map(listaEstados -> {
+                    if (listaEstados.isEmpty()) {
+                        return new ResponseEntity<>(
+                            UtilConverter.apiResponse(HttpStatus.NOT_FOUND, null), 
+                            HttpStatus.NOT_FOUND
+                        );
+                    }
+                    return new ResponseEntity<>(
+                        UtilConverter.apiResponse(HttpStatus.OK, listaEstados), 
+                        HttpStatus.OK
+                    );
+                });
 	}
 	
 	
