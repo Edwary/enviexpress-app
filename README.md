@@ -2,7 +2,7 @@
 
 Este proyecto es una solución de software escalable orientada a microservicios para la gestión logística (administración, usuarios, clientes y paquetes). Está diseñado con un enfoque reactivo para garantizar un alto rendimiento y un manejo eficiente de la concurrencia.
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 El proyecto está dividido en dos capas principales, construidas con las siguientes tecnologías:
 
@@ -32,12 +32,12 @@ El proyecto está dividido en dos capas principales, construidas con las siguien
 
 El backend está compuesto por 4 microservicios independientes. Cada uno expone su propia API y corre en un puerto específico de la máquina anfitriona:
 
-| Microservicio | Módulo | Puerto | Descripción |
-| --- | --- | --- | --- |
-| **Administración** | `admmodule` | `8080` | Gestión de catálogos y configuraciones globales (ubicaciones, estados, menús). |
-| **Usuarios** | `usermodule` | `8081` | Gestión de identidades, autenticación y roles de acceso. |
-| **Clientes** | `clientmodule` | `8082` | Administración del directorio de clientes remitentes. |
-| **Paquetes** | `packmodule` | `8083` | Núcleo logístico: creación de guías, hojas de ruta y estados operativos. |
+| Microservicio      | Módulo           | Puerto | Descripción                                                                      |
+| ---                | ---              | ---    | ---                                                                              |
+| **Administración** | `admmodule`      | `8080` | Gestión de catálogos y configuraciones globales (ubicaciones, estados, menús).   |
+| **Usuarios**       | `usermodule`     | `8081` | Gestión de identidades, autenticación y roles de acceso.                         |
+| **Clientes**       | `clientmodule`   | `8082` | Administración del directorio de clientes remitentes.                            |
+| **Paquetes**       | `packmodule`     | `8083` | Núcleo logístico: creación de guías, hojas de ruta y estados operativos.         |
 
 ---
 
@@ -89,7 +89,8 @@ admmodule.httpClient.connectTimeout: 30000
 admmodule.httpClient.readTimeout: 50000   
 
 ```
-NOTA: Para realizar una validación se seguridad no se trabajó en el puerto 27017 que por defecto es el de mongodb, sino que se habilitó un puerto especial, para este caso el 27969
+NOTA 1: Para realizar una validación se seguridad no se trabajó en el puerto 27017 que por defecto es el de mongodb, sino que se habilitó un puerto especial, para este caso el 27969
+NOTA 2: El password para la bd se dará a solicitud
 
 ---
 
